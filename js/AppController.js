@@ -708,12 +708,11 @@ class AppController {
       const sortableInstance = new Sortable(col, {
         group: "sharedColumns",
         animation: 150,
-        handle: ".group-card", // Drag from anywhere on the card
-        delay: 350,
-        delayOnTouchOnly: false,
+        // Normal groups: drag from header. Widgets: drag from their content area (covers the whole card)
+        handle: ".group-header, .clock-widget, .text-widget-content",
         ghostClass: "sortable-ghost",
-        // Filter out all interactive elements to allow clicking them normally
-        filter: ".add-group-placeholder, .site-item, .add-site-btn, .group-settings-btn, .delete-site-btn, .text-widget-editor",
+        filter: ".add-group-placeholder, .text-widget-editor",
+        preventOnFilter: false,
         onStart: () => document.body.classList.add("dragging-active"),
         onEnd: (evt) => {
           document.body.classList.remove("dragging-active");
