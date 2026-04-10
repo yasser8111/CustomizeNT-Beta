@@ -530,9 +530,6 @@ body.simple-mode .header-btn {
   padding-bottom: 100%; /* Makes some elements square by default if no height */
 }
 
-  z-index: 5;
-}
-
 .site-item:hover .delete-site-btn {
   opacity: 0.6;
 }
