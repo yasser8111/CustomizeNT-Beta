@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "RedEye",
+  "name": "CustomizeNT",
   "version": "1.0",
   "description": "Overrides the default new tab page.",
   "chrome_url_overrides": {

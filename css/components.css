@@ -851,7 +851,7 @@ body.simple-mode .header-btn {
 }
 
 .clock-time {
-  font-size: 3.2rem;
+  font-size: 3.5rem;
   font-weight: 700;
   letter-spacing: -1px;
   line-height: 1;
@@ -861,34 +861,28 @@ body.simple-mode .header-btn {
   z-index: 1;
 }
 
-.skeleton-clock {
-  position: relative;
-}
-
-.skeleton-clock::before {
-  content: attr(data-skeleton);
-  position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 0.08;
-  z-index: -1;
-  pointer-events: none;
-}
-
 .clock-indicator {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: 700;
   opacity: 0.7;
   text-transform: uppercase;
 }
 
 .group-card.widget-card {
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.analog-widget {
+  aspect-ratio: 1 / 1;
+}
+
+.digital-widget {
+  aspect-ratio: 1.8 / 1 !important;
+  width: 100%;
+  height: auto !important;
 }
 
 .clock-widget-settings {

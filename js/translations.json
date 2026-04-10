@@ -1,6 +1,6 @@
 {
   "ar": {
-    "page_title": "RedEye | صفحة بداية مخصصة",
+    "page_title": "CustomizeNT | صفحة بداية مخصصة",
     "meta_description": "RedEye - صفحة بداية مخصصة وبسيطة لإدارة روابطك المفضلة بأسلوب عصري.",
     "templates": "القوالب",
     "customize": "تخصيص",
@@ -79,8 +79,8 @@
     "save_as_template": "حفظ كقالب",
     "template_name_prompt": "الرجاء إدخال اسم القالب الجديد:",
     "about": "حول",
-    "about_title": "حول المشروع",
-    "about_desc": "RedEye هي واجهة بداية مخصصة تم تصميمها لتكون سريعة، بسيطة، واحترافية. يمكنك تنظيم روابطك بسهولة وتخصيص المظهر بالكامل.",
+    "about_title": "حول CustomizeNT",
+    "about_desc": "CustomizeNT هي واجهة بداية مخصصة تم تصميمها لتكون سريعة، بسيطة، واحترافية. يمكنك تنظيم روابطك بسهولة وتخصيص المظهر بالكامل.",
     "close": "إغلاق",
     "data_management": "إدارة البيانات",
     "export_data": "تصدير البيانات (نسخة احتياطية)",
@@ -91,7 +91,7 @@
     "convert to analog": "تحويل إلى ساعة عقارب"
   },
   "en": {
-    "page_title": "RedEye | Custom New Tab",
+    "page_title": "CustomizeNT | Custom New Tab",
     "meta_description": "RedEye - A simple and custom new tab page to manage your favorite links with style.",
     "templates": "Templates",
     "customize": "Customize",
@@ -170,8 +170,8 @@
     "save_as_template": "Save as Template",
     "template_name_prompt": "Please enter custom template name:",
     "about": "About",
-    "about_title": "About RedEye",
-    "about_desc": "RedEye is a custom new tab page designed to be fast, simple, and professional. Easily organize your links and fully customize the appearance.",
+    "about_title": "About CustomizeNT",
+    "about_desc": "CustomizeNT is a custom new tab page designed to be fast, simple, and professional. Easily organize your links and fully customize the appearance.",
     "close": "Close",
     "data_management": "Data Management",
     "export_data": "Export Data (Backup)",

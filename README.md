@@ -1,9 +1,9 @@
-# ControlTab Extension (Beta)
+# CustomizeNT (Beta)
 
 ![Zen Minimalist Preview 1](previwe-1.png)
 ![Zen Minimalist Preview 2](previwe-2.png)
 
-ControlTab is a professional, minimalist, and highly customizable browser "New Tab" extension. It provides a zen-like experience for managing your favorite links with elegant design and smooth performance.
+CustomizeNT is a professional, minimalist, and highly customizable browser "New Tab" extension. It provides a zen-like experience for managing your favorite links with elegant design and smooth performance.
 
 ## ✨ Features
 

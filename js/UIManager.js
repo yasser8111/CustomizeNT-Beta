@@ -368,23 +368,36 @@ class UIManager {
       nameEl.textContent = page.title || this.getTranslation("new_page");
       nameEl.dir = "auto";
 
-      nameEl.addEventListener("dblclick", (e) => {
-        e.stopPropagation();
+      const startRenaming = () => {
         nameEl.contentEditable = true;
         nameEl.focus();
         document.execCommand("selectAll", false, null);
+        tabEl.classList.add("is-renaming");
+      };
+
+      nameEl.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        startRenaming();
       });
-      nameEl.addEventListener("blur", (e) => {
+
+      nameEl.addEventListener("blur", () => {
         nameEl.contentEditable = false;
-        const newTitle =
-          e.target.textContent.trim() || this.getTranslation("new_page");
-        if (newTitle !== page.title) {
+        tabEl.classList.remove("is-renaming");
+        const newTitle = nameEl.textContent.trim();
+        if (newTitle && newTitle !== page.title) {
           actions.onRenamePage(page.id, newTitle);
+        } else {
+          nameEl.textContent = page.title || this.getTranslation("new_page");
         }
       });
+
       nameEl.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
+          nameEl.blur();
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          nameEl.textContent = page.title;
           nameEl.blur();
         }
       });
@@ -401,9 +414,7 @@ class UIManager {
         '<i data-lucide="pencil" width="12" height="12"></i>';
       renameBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        nameEl.contentEditable = true;
-        nameEl.focus();
-        document.execCommand("selectAll", false, null);
+        startRenaming();
       });
       actionsWrap.appendChild(renameBtn);
 
@@ -422,7 +433,8 @@ class UIManager {
 
       tabEl.appendChild(actionsWrap);
 
-      tabEl.addEventListener("click", () => {
+      tabEl.addEventListener("click", (e) => {
+        if (nameEl.contentEditable === "true") return;
         if (page.id !== activePageId) {
           actions.onSelectPage(page.id);
         }
@@ -552,6 +564,7 @@ class UIManager {
 
     if (isClockWidget) {
       groupEl.classList.add("widget-card");
+      groupEl.classList.add(isDigitalClock ? "digital-widget" : "analog-widget");
       // Magic Widget: Clock
       // DO NOT Append Header for clock widget. Use an absolutely positioned dropdown
       const settingsWrap = this._createGroupSettingsDropdown(
@@ -575,13 +588,11 @@ class UIManager {
         timeWrap.style.gap = "8px";
 
         const timeEl = document.createElement("div");
-        timeEl.className = "clock-time skeleton-clock";
-        timeEl.dataset.skeleton = "00:00";
+        timeEl.className = "clock-time";
         timeEl.textContent = "00:00"; // Initial state
 
         const ampmEl = document.createElement("div");
-        ampmEl.className = "clock-indicator skeleton-clock";
-        ampmEl.dataset.skeleton = "A";
+        ampmEl.className = "clock-indicator";
         ampmEl.textContent = "A"; // Initial state
         ampmEl.style.fontSize = "1.2rem";
         ampmEl.style.lineHeight = "1";
@@ -709,11 +720,16 @@ class UIManager {
     renameBtn.innerHTML = `<i data-lucide="pencil" width="14" height="14" stroke-width="1.5"></i> ${this.getTranslation("rename_group_btn")}`;
     renameBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const newName = prompt(this.getTranslation("rename_group"), group.title);
-      if (newName && newName.trim()) {
-        actions.onRenameGroup(group.id, newName.trim());
-      }
       dropdown.classList.remove("show");
+      
+      // Trigger the title editing directly
+      const groupCard = dropdown.closest(".group-card");
+      const titleEl = groupCard.querySelector(".group-title");
+      if (titleEl) {
+        titleEl.contentEditable = true;
+        titleEl.focus();
+        document.execCommand("selectAll", false, null);
+      }
     });
 
     const delBtn = document.createElement("button");
