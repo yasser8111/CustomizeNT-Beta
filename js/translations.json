@@ -97,7 +97,9 @@
     "no_valid_tabs": "لا توجد تبويبات صالحة للجمع",
     "tab_added": "✓ تمت إضافة التبويب",
     "tabs_collected": "✓ تم جمع {count} تبويب",
-    "collected_tabs": "تبويبات مجمّعة"
+    "collected_tabs": "تبويبات مجمّعة",
+    "text_widget_title": "عنوان",
+    "text_widget_body": "اكتب هنا..."
   },
   "en": {
     "page_title": "ControlTap | Custom New Tab",
@@ -197,6 +199,8 @@
     "no_valid_tabs": "No valid tabs to collect",
     "tab_added": "✓ Tab added successfully",
     "tabs_collected": "✓ Collected {count} tabs",
-    "collected_tabs": "Collected Tabs"
+    "collected_tabs": "Collected Tabs",
+    "text_widget_title": "Title",
+    "text_widget_body": "Type here..."
   }
 }

@@ -41,6 +41,7 @@ class AppController {
       onDeleteGroup: (groupId) => this._removeGroup(groupId),
       onOpenAddSiteModal: (groupId) => this._openSiteModal(groupId),
       onDeleteSite: (groupId, siteId) => this._removeSite(groupId, siteId),
+      onSaveWidgetData: (groupId, data) => this._saveWidgetData(groupId, data),
     };
 
     const pageActions = {
@@ -183,6 +184,14 @@ class AppController {
 
   _findGroup(id) {
     return this._getActivePage()?.groups.find((g) => g.id === id);
+  }
+
+  _saveWidgetData(groupId, data) {
+    const group = this._findGroup(groupId);
+    if (group) {
+      group.widgetData = data;
+      this.stateManager.save();
+    }
   }
 
   _openSiteModal(groupId) {

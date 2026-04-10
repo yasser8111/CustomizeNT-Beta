@@ -5,6 +5,7 @@
  */
 class UIManager {
   constructor() {
+    this.widgetManager = new WidgetManager();
     this.elements = {
       board: document.getElementById("board"),
       bgVideo: document.getElementById("bgVideo"),
@@ -564,149 +565,35 @@ class UIManager {
     groupEl.className = "group-card";
     groupEl.dataset.id = group.id;
 
-    const headerEl = document.createElement("div");
-    headerEl.className = "group-header";
+    // Delegate to WidgetManager if this group is a widget
+    const widgetType = this.widgetManager.detect(group);
 
-    const titleEl = document.createElement("div");
-    titleEl.className = "group-title";
-    titleEl.textContent = group.title;
-    titleEl.dir = "auto";
-
-    titleEl.addEventListener("dblclick", (e) => {
-      e.stopPropagation();
-      titleEl.contentEditable = true;
-      titleEl.focus();
-      document.execCommand("selectAll", false, null);
-    });
-    titleEl.addEventListener("blur", (e) => {
-      titleEl.contentEditable = false;
-      const defaultTitle =
-        this.getTranslation("new_group_placeholder") || "New Group";
-      const newTitle = e.target.textContent.trim() || defaultTitle;
-      actions.onRenameGroup(group.id, newTitle);
-    });
-
-    const titleLower = group.title.trim().toLowerCase();
-    const isAnalogClock =
-      (titleLower === "clock" ||
-        titleLower === "clook" ||
-        titleLower === "ساعة") &&
-      group.sites.length === 0;
-    const isDigitalClock =
-      (titleLower === "digital" || titleLower === "ساعة رقمية") &&
-      group.sites.length === 0;
-    const isClockWidget = isAnalogClock || isDigitalClock;
-
-    if (isClockWidget) {
-      groupEl.classList.add("widget-card");
-      groupEl.classList.add(isDigitalClock ? "digital-widget" : "analog-widget");
-      // Magic Widget: Clock
-      // DO NOT Append Header for clock widget. Use an absolutely positioned dropdown
-      const settingsWrap = this._createGroupSettingsDropdown(
-        group,
-        actions,
-        isAnalogClock ? "analog" : "digital",
-      );
-      settingsWrap.className = "group-settings-wrap clock-widget-settings";
-      groupEl.appendChild(settingsWrap);
-
-      const clockWrap = document.createElement("div");
-      clockWrap.className = "clock-widget";
-
-      let updateClock;
-
-      if (isDigitalClock) {
-        const timeWrap = document.createElement("div");
-        timeWrap.style.display = "flex";
-        timeWrap.style.flexDirection = "row";
-        timeWrap.style.alignItems = "baseline";
-        timeWrap.style.gap = "8px";
-
-        const timeEl = document.createElement("div");
-        timeEl.className = "clock-time";
-        timeEl.textContent = "00:00"; // Initial state
-
-        const ampmEl = document.createElement("div");
-        ampmEl.className = "clock-indicator";
-        ampmEl.textContent = "A"; // Initial state
-        ampmEl.style.fontSize = "1.2rem";
-        ampmEl.style.lineHeight = "1";
-        ampmEl.style.fontWeight = "700";
-        ampmEl.style.opacity = "0.7";
-        ampmEl.style.textTransform = "uppercase";
-
-        timeWrap.appendChild(timeEl);
-        timeWrap.appendChild(ampmEl);
-        clockWrap.appendChild(timeWrap);
-
-        updateClock = () => {
-          if (!document.body.contains(clockWrap)) return;
-          const now = new Date();
-          let hours = now.getHours();
-          const isPm = hours >= 12;
-          hours = hours % 12;
-          hours = hours ? hours : 12;
-          const hoursStr = hours.toString().padStart(2, "0");
-          const minutesStr = now.getMinutes().toString().padStart(2, "0");
-          
-          timeEl.textContent = `${hoursStr}:${minutesStr}`;
-          ampmEl.textContent = isPm ? "P" : "A";
-        };
-      } else {
-        // Analog Block
-        const analogBox = document.createElement("div");
-        analogBox.className = "analog-clock";
-
-        const hourHand = document.createElement("div");
-        hourHand.className = "analog-hand hour-hand";
-        const minHand = document.createElement("div");
-        minHand.className = "analog-hand min-hand";
-        const secHand = document.createElement("div");
-        secHand.className = "analog-hand sec-hand";
-        const centerDot = document.createElement("div");
-        centerDot.className = "clock-center";
-
-        analogBox.appendChild(hourHand);
-        analogBox.appendChild(minHand);
-        analogBox.appendChild(secHand);
-        analogBox.appendChild(centerDot);
-        clockWrap.appendChild(analogBox);
-
-        updateClock = () => {
-          if (!document.body.contains(clockWrap)) return;
-          const now = new Date();
-          const sec = now.getSeconds();
-          const min = now.getMinutes();
-          const hr = now.getHours();
-
-          const secDeg = sec * 6; // 360 / 60
-          const minDeg = min * 6 + sec * 0.1;
-          const hrDeg = (hr % 12) * 30 + min * 0.5;
-
-          secHand.style.transform = `translateX(-50%) rotate(${secDeg}deg)`;
-          minHand.style.transform = `translateX(-50%) rotate(${minDeg}deg)`;
-          hourHand.style.transform = `translateX(-50%) rotate(${hrDeg}deg)`;
-        };
-      }
-
-      groupEl.appendChild(clockWrap);
-
-      updateClock();
-      const interval = setInterval(updateClock, 1000);
-
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          mutation.removedNodes.forEach((node) => {
-            if (node === groupEl || node.contains(groupEl)) {
-              clearInterval(interval);
-              observer.disconnect();
-            }
-          });
-        });
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
+    if (widgetType) {
+      this.widgetManager.render(widgetType, group, groupEl, actions, this);
     } else {
       // Standard Group Rendering
+      const headerEl = document.createElement("div");
+      headerEl.className = "group-header";
+
+      const titleEl = document.createElement("div");
+      titleEl.className = "group-title";
+      titleEl.textContent = group.title;
+      titleEl.dir = "auto";
+
+      titleEl.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        titleEl.contentEditable = true;
+        titleEl.focus();
+        document.execCommand("selectAll", false, null);
+      });
+      titleEl.addEventListener("blur", (e) => {
+        titleEl.contentEditable = false;
+        const defaultTitle =
+          this.getTranslation("new_group_placeholder") || "New Group";
+        const newTitle = e.target.textContent.trim() || defaultTitle;
+        actions.onRenameGroup(group.id, newTitle);
+      });
+
       headerEl.appendChild(titleEl);
       headerEl.appendChild(this._createGroupSettingsDropdown(group, actions));
       groupEl.appendChild(headerEl);

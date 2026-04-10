@@ -1024,3 +1024,60 @@ body.simple-mode .header-btn {
   pointer-events: auto;
 }
 
+/* ==========================================================================
+   Text / Notes Widget
+   ========================================================================== */
+.text-widget-content {
+  padding: 16px 20px;
+  flex-grow: 1;
+  cursor: default;
+  min-height: 60px;
+  border: 2px dashed transparent;
+  border-radius: 0 0 var(--radius) var(--radius);
+  transition: border-color 0.2s ease;
+}
+
+.text-widget-content:hover {
+  border-color: rgba(var(--primary-color-rgb), 0.15);
+}
+
+.text-widget-heading {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--group-title-color);
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.text-widget-paragraph {
+  font-size: 14px;
+  color: var(--text-color);
+  opacity: 0.85;
+  margin: 0 0 6px 0;
+  line-height: 1.7;
+}
+
+.text-widget-spacer {
+  height: 8px;
+}
+
+.text-widget-editor {
+  width: 100%;
+  min-height: 100px;
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+  resize: none;
+  outline: none;
+  padding: 0;
+  overflow: hidden;
+}
+
+.text-widget-editor::placeholder {
+  color: var(--text-color);
+  opacity: 0.3;
+}
+
