@@ -179,6 +179,12 @@
   background: rgba(148, 163, 184, 0.2);
 }
 
+.clock-widget-settings {
+  display: flex !important;
+  align-items: center;
+  gap: 4px;
+}
+
 .group-dropdown {
   position: absolute;
   top: calc(100% + 10px);

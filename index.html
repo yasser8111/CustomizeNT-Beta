@@ -296,7 +296,12 @@
     <!-- نافذة الإعدادات العامة (الجديدة) -->
     <div id="settingsModal" class="modal-overlay">
       <div class="modal">
-        <h2 data-i18n="general_settings">الإعدادات العامة</h2>
+        <div class="modal-header" style="margin-bottom: 20px;">
+          <h2 style="margin: 0; font-size: 24px;" data-i18n="general_settings">الإعدادات العامة</h2>
+          <button id="closeSettingsX" class="header-btn" style="padding: 10px; justify-content: center; height: 42px; width: 42px;">
+            <i data-lucide="x" width="20" height="20"></i>
+          </button>
+        </div>
         <p
           style="
             margin-bottom: 20px;
@@ -635,14 +640,14 @@
     <div id="aboutModal" class="modal-overlay">
       <div
         class="modal"
-        style="max-width: 400px; text-align: center; padding: 32px"
+        style="max-width: 450px; text-align: center; padding: 24px"
       >
-        <h2
-          style="margin-bottom: 24px; font-size: 20px"
-          data-i18n="about_title"
-        >
-          حول المشروع
-        </h2>
+        <div class="modal-header" style="margin-bottom: 24px; justify-content: space-between; display: flex; align-items: center; width: 100%;">
+          <h2 style="margin: 0; font-size: 24px;" data-i18n="about_title">حول المشروع</h2>
+          <button id="closeAboutX" class="header-btn" style="padding: 10px; justify-content: center; height: 42px; width: 42px;">
+            <i data-lucide="x" width="20" height="20"></i>
+          </button>
+        </div>
         <p
           style="
             color: var(--text-color);

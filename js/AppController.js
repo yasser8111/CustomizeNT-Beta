@@ -252,6 +252,13 @@ class AppController {
       this.ui.toggleModal("customize", true);
     });
 
+    const closeCustomizeX = document.getElementById("closeCustomizeX");
+    if (closeCustomizeX) {
+      closeCustomizeX.addEventListener("click", () =>
+        this.ui.toggleModal("customize", false),
+      );
+    }
+
     document.getElementById("settingsBtn").addEventListener("click", () => {
       const settings = this.stateManager.getState().settings;
       if (inputs.colCount) inputs.colCount.value = settings.columnsCount || 6;
@@ -274,6 +281,13 @@ class AppController {
       this.ui.toggleModal("settings", true);
     });
 
+    const closeSettingsX = document.getElementById("closeSettingsX");
+    if (closeSettingsX) {
+      closeSettingsX.addEventListener("click", () =>
+        this.ui.toggleModal("settings", false),
+      );
+    }
+
     document.getElementById("templatesBtn").addEventListener("click", async () => {
       await this.ui.renderTemplates((template) => this._onSelectTemplate(template), this.mediaStorage);
       this.ui.toggleModal("templates", true);
@@ -289,6 +303,13 @@ class AppController {
     const closeAboutBtn = document.getElementById("closeAboutBtn");
     if (closeAboutBtn) {
       closeAboutBtn.addEventListener("click", () => {
+        this.ui.toggleModal("about", false);
+      });
+    }
+
+    const closeAboutX = document.getElementById("closeAboutX");
+    if (closeAboutX) {
+      closeAboutX.addEventListener("click", () => {
         this.ui.toggleModal("about", false);
       });
     }
@@ -473,15 +494,28 @@ class AppController {
       resetBtn.addEventListener("click", () => {
         if (confirm(this.ui.getTranslation("reset_confirm"))) {
           const settings = this.stateManager.getState().settings;
+          // Core defaults
           settings.columnsCount = 6;
           settings.cardSize = 100;
           settings.searchSize = 100;
           settings.simpleMode = false;
           settings.openInNewTab = false;
           settings.showSearchBar = false;
+          settings.language = 'en';
+          
+          // Background/Appearance defaults
+          settings.themeMode = 'dark';
+          settings.primaryColor = '#FF2E32';
+          settings.cardOpacity = 0.0;
+          settings.bgType = 'videoUrl';
+          settings.bgImage = 'backgrounds/1111.mp4';
+
+          // Update inputs if they exist
           if (inputs.simpleMode) inputs.simpleMode.checked = false;
           if (inputs.openInNewTab) inputs.openInNewTab.checked = false;
           if (inputs.showSearchBar) inputs.showSearchBar.checked = false;
+          if (inputs.language) inputs.language.value = 'en';
+          
           this.stateManager.save();
           this.ui.applySettings(settings, this.mediaStorage);
           this.renderAll();
