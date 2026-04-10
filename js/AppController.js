@@ -623,11 +623,16 @@ class AppController {
         this._addGroup();
       }
 
-      // Site shortcut: Alt + N (New Group + Add Site Modal)
-      if (e.altKey && (e.key === "n" || e.key === "ى")) {
+      // Shortcut: Alt + S (Add current tab only)
+      if (e.altKey && (e.key === "s" || e.key === "س")) {
         e.preventDefault();
-        const nextId = this._addGroup();
-        this._openSiteModal(nextId);
+        this._addCurrentTab();
+      }
+
+      // Shortcut: Alt + A (Collect all open tabs into a group)
+      if (e.altKey && (e.key === "a" || e.key === "ش")) {
+        e.preventDefault();
+        this._addAllTabsToGroup();
       }
     });
   }
@@ -810,6 +815,100 @@ class AppController {
     reader.readAsText(file);
     // Reset input
     event.target.value = '';
+  }
+
+  /**
+   * Shows a toast notification at the bottom of the screen.
+   */
+  _showToast(message, duration = 2500) {
+    let toast = document.getElementById('shortcut-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'shortcut-toast';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => {
+      toast.classList.remove('show');
+    }, duration);
+  }
+
+  /**
+   * Alt + S: Add ONLY the currently active tab as a site in a new group.
+   */
+  async _addCurrentTab() {
+    if (typeof chrome === 'undefined' || !chrome.tabs) {
+      console.warn('chrome.tabs API not available');
+      return;
+    }
+    try {
+      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!activeTab || !activeTab.url || activeTab.url.startsWith('chrome://') || activeTab.url.startsWith('chrome-extension://')) {
+        this._showToast(this.ui.getTranslation('no_valid_tab') || 'No valid tab to add');
+        return;
+      }
+      const siteName = activeTab.title || new URL(activeTab.url).hostname;
+      const groupId = this._addGroup();
+      if (groupId) {
+        const group = this._findGroup(groupId);
+        if (group) {
+          group.title = siteName;
+          group.sites.push({
+            id: `site-${Date.now()}`,
+            name: siteName,
+            url: activeTab.url,
+            desc: ''
+          });
+          this.stateManager.save();
+          this.renderAll();
+        }
+      }
+      this._showToast(this.ui.getTranslation('tab_added') || `✓ Added: ${siteName}`);
+    } catch (err) {
+      console.error('Failed to add current tab:', err);
+    }
+  }
+
+  /**
+   * Alt + A: Collect ALL open tabs in the current window and put them into a single new group.
+   */
+  async _addAllTabsToGroup() {
+    if (typeof chrome === 'undefined' || !chrome.tabs) {
+      console.warn('chrome.tabs API not available');
+      return;
+    }
+    try {
+      const tabs = await chrome.tabs.query({ currentWindow: true });
+      // Filter out chrome:// and extension pages
+      const validTabs = tabs.filter(t => t.url && !t.url.startsWith('chrome://') && !t.url.startsWith('chrome-extension://'));
+      if (validTabs.length === 0) {
+        this._showToast(this.ui.getTranslation('no_valid_tabs') || 'No valid tabs to collect');
+        return;
+      }
+      const groupId = this._addGroup();
+      if (groupId) {
+        const group = this._findGroup(groupId);
+        if (group) {
+          const dateStr = new Date().toLocaleDateString();
+          group.title = (this.ui.getTranslation('collected_tabs') || 'Collected Tabs') + ` (${validTabs.length})`;
+          validTabs.forEach(tab => {
+            group.sites.push({
+              id: `site-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+              name: tab.title || new URL(tab.url).hostname,
+              url: tab.url,
+              desc: ''
+            });
+          });
+          this.stateManager.save();
+          this.renderAll();
+        }
+      }
+      this._showToast((this.ui.getTranslation('tabs_collected') || `✓ Collected ${validTabs.length} tabs`).replace('{count}', validTabs.length));
+    } catch (err) {
+      console.error('Failed to collect tabs:', err);
+    }
   }
 
   _initSearchSuggestions() {

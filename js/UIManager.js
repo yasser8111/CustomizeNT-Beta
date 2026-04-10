@@ -860,6 +860,7 @@ class UIManager {
       '<i data-lucide="x" width="14" height="14" stroke-width="2" aria-hidden="true"></i>';
     delSiteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
+      e.preventDefault();
       actions.onDeleteSite(groupId, site.id);
     });
 

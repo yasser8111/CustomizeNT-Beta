@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ControlTap",
-  "version": "1.0",
+  "version": "2.0",
   "description": "Overrides the default new tab page.",
   "chrome_url_overrides": {
     "newtab": "index.html"
@@ -16,6 +16,21 @@
   },
   "permissions": [
     "unlimitedStorage",
-    "history"
-  ]
+    "history",
+    "tabs"
+  ],
+  "commands": {
+    "add-current-tab": {
+      "suggested_key": {
+        "default": "Alt+S"
+      },
+      "description": "Add current tab to a group"
+    },
+    "add-all-tabs": {
+      "suggested_key": {
+        "default": "Alt+A"
+      },
+      "description": "Collect all tabs into a new group"
+    }
+  }
 }

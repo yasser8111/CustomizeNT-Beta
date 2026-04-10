@@ -751,10 +751,6 @@ body.simple-mode .header-btn {
   box-shadow: none;
 }
 
-.search-box:focus-within {
-  /* Border/glow handled by container */
-}
-
 .search-box input {
   flex: 1;
   background: transparent;
@@ -995,3 +991,36 @@ body.simple-mode .header-btn {
   z-index: 10;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
+/* ==========================================================================
+   Toast Notification (Shortcut Feedback)
+   ========================================================================== */
+#shortcut-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(var(--card-bg-rgb), 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255,255,255,0.05);
+  z-index: 99999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+#shortcut-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+

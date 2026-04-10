@@ -92,7 +92,12 @@
     "import_success": "تم استيراد البيانات بنجاح!",
     "import_error": "خطأ: الملف غير صالح أو تالف.",
     "convert to digital": "تحويل إلى ساعة رقمية",
-    "convert to analog": "تحويل إلى ساعة عقارب"
+    "convert to analog": "تحويل إلى ساعة عقارب",
+    "no_valid_tab": "لا يوجد تبويب صالح للإضافة",
+    "no_valid_tabs": "لا توجد تبويبات صالحة للجمع",
+    "tab_added": "✓ تمت إضافة التبويب",
+    "tabs_collected": "✓ تم جمع {count} تبويب",
+    "collected_tabs": "تبويبات مجمّعة"
   },
   "en": {
     "page_title": "ControlTap | Custom New Tab",
@@ -187,6 +192,11 @@
     "import_success": "Data imported successfully!",
     "import_error": "Error: Invalid or corrupted file.",
     "convert to digital": "Convert to Digital Clock",
-    "convert to analog": "Convert to Analog Clock"
+    "convert to analog": "Convert to Analog Clock",
+    "no_valid_tab": "No valid tab to add",
+    "no_valid_tabs": "No valid tabs to collect",
+    "tab_added": "✓ Tab added successfully",
+    "tabs_collected": "✓ Collected {count} tabs",
+    "collected_tabs": "Collected Tabs"
   }
 }
