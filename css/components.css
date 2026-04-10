@@ -1037,8 +1037,8 @@ body.simple-mode .header-btn {
   transition: border-color 0.2s ease;
 }
 
-.text-widget-content:hover {
-  border-color: rgba(var(--primary-color-rgb), 0.15);
+.text-widget-content.editing {
+  border-color: rgba(var(--primary-color-rgb), 0.25);
 }
 
 .text-widget-heading {

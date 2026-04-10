@@ -82,34 +82,44 @@ class WidgetManager {
   }
 
   /**
-   * Create a standard group header (title + settings dropdown).
-   * Reusable by any widget that wants a normal header.
+   * Create a minimal widget dropdown with DELETE only.
+   * Used by all widgets (clocks, text, etc.)
    */
-  _createHeader(group, actions, ui, widgetType = null) {
-    const headerEl = document.createElement('div');
-    headerEl.className = 'group-header';
+  _createWidgetDropdown(group, actions, ui) {
+    const wrap = document.createElement('div');
+    wrap.className = 'group-settings-wrap clock-widget-settings';
 
-    const titleEl = document.createElement('div');
-    titleEl.className = 'group-title';
-    titleEl.textContent = group.title;
-    titleEl.dir = 'auto';
+    const triggerBtn = document.createElement('button');
+    triggerBtn.className = 'group-settings-btn';
+    triggerBtn.setAttribute('aria-label', ui.getTranslation('group_options'));
+    triggerBtn.innerHTML = '<i data-lucide="ellipsis-vertical" width="16" height="16" stroke-width="1.5" aria-hidden="true"></i>';
 
-    titleEl.addEventListener('dblclick', (e) => {
+    const dropdown = document.createElement('div');
+    dropdown.className = 'group-dropdown';
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'delete-dropdown-btn';
+    delBtn.innerHTML = `<i data-lucide="trash" width="14" height="14" stroke-width="1.5"></i> ${ui.getTranslation('delete_group_btn')}`;
+    delBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      titleEl.contentEditable = true;
-      titleEl.focus();
-      document.execCommand('selectAll', false, null);
-    });
-    titleEl.addEventListener('blur', (e) => {
-      titleEl.contentEditable = false;
-      const defaultTitle = ui.getTranslation('new_group_placeholder') || 'New Group';
-      const newTitle = e.target.textContent.trim() || defaultTitle;
-      actions.onRenameGroup(group.id, newTitle);
+      if (confirm(ui.getTranslation('delete_group_confirm'))) {
+        actions.onDeleteGroup(group.id);
+      }
     });
 
-    headerEl.appendChild(titleEl);
-    headerEl.appendChild(ui._createGroupSettingsDropdown(group, actions, widgetType));
-    return headerEl;
+    dropdown.appendChild(delBtn);
+    wrap.appendChild(triggerBtn);
+    wrap.appendChild(dropdown);
+
+    triggerBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.querySelectorAll('.group-dropdown.show').forEach((d) => {
+        if (d !== dropdown) d.classList.remove('show');
+      });
+      dropdown.classList.toggle('show');
+    });
+
+    return wrap;
   }
 
   // ─── Built-in Widgets ──────────────────────────────────────
@@ -120,15 +130,12 @@ class WidgetManager {
     // ║        Analog Clock             ║
     // ╚══════════════════════════════════╝
     this.register('analog-clock', {
-      triggers: ['clock', 'clook', 'ساعة'],
+      triggers: ['analog_clock'],
       requireEmpty: true,
       aspectSquare: true,
       render: (group, groupEl, actions, ui) => {
         groupEl.classList.add('analog-widget');
-
-        const settingsWrap = ui._createGroupSettingsDropdown(group, actions, 'analog');
-        settingsWrap.className = 'group-settings-wrap clock-widget-settings';
-        groupEl.appendChild(settingsWrap);
+        groupEl.appendChild(this._createWidgetDropdown(group, actions, ui));
 
         const clockWrap = document.createElement('div');
         clockWrap.className = 'clock-widget';
@@ -168,15 +175,12 @@ class WidgetManager {
     // ║        Digital Clock            ║
     // ╚══════════════════════════════════╝
     this.register('digital-clock', {
-      triggers: ['digital', 'ساعة رقمية'],
+      triggers: ['digital_clock'],
       requireEmpty: true,
       aspectSquare: true,
       render: (group, groupEl, actions, ui) => {
         groupEl.classList.add('digital-widget');
-
-        const settingsWrap = ui._createGroupSettingsDropdown(group, actions, 'digital');
-        settingsWrap.className = 'group-settings-wrap clock-widget-settings';
-        groupEl.appendChild(settingsWrap);
+        groupEl.appendChild(this._createWidgetDropdown(group, actions, ui));
 
         const clockWrap = document.createElement('div');
         clockWrap.className = 'clock-widget';
@@ -228,16 +232,17 @@ class WidgetManager {
           }
         }
 
-        // Header with title + settings dropdown
-        groupEl.appendChild(this._createHeader(group, actions, ui));
+        // Delete-only dropdown (no header)
+        groupEl.appendChild(this._createWidgetDropdown(group, actions, ui));
 
-        // Content area
+        // Content area (fills the whole card)
         const contentArea = document.createElement('div');
         contentArea.className = 'text-widget-content';
 
         // Parse and render text lines
         const renderText = (rawText) => {
           contentArea.innerHTML = '';
+          contentArea.classList.remove('editing');
           const lines = (rawText || '').split('\n');
           lines.forEach(line => {
             if (line.startsWith('# ')) {
@@ -267,6 +272,8 @@ class WidgetManager {
           e.stopPropagation();
           // Don't re-enter if already editing
           if (contentArea.querySelector('.text-widget-editor')) return;
+
+          contentArea.classList.add('editing');
 
           const textarea = document.createElement('textarea');
           textarea.className = 'text-widget-editor';
