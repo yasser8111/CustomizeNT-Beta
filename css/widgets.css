@@ -54,29 +54,31 @@
 /* --- Widget Delete Button (trash icon, top-right corner) --- */
 .widget-delete-btn {
   position: absolute;
-  top: 10px;
-  inset-inline-end: 10px;
+  top: 8px;
+  inset-inline-end: 8px;
   z-index: 20;
-  background: rgba(0, 0, 0, 0.35);
+  background: transparent;
   border: none;
-  border-radius: 8px;
-  color: #fff;
-  width: 30px;
-  height: 30px;
+  border-radius: 6px;
+  color: var(--text-color);
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.2s ease, background 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .group-card:hover .widget-delete-btn {
-  opacity: 1;
+  opacity: 0.6;
 }
 
 .widget-delete-btn:hover {
-  background: rgba(220, 38, 38, 0.8);
+  background: rgba(var(--card-bg-rgb), 0.15) !important;
+  color: var(--danger-color) !important;
+  opacity: 1 !important;
 }
 
 .analog-clock {
