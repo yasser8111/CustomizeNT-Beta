@@ -25,32 +25,69 @@ class StateManager {
           bgType: "videoUrl",
           bgImage: "backgrounds/1111.mp4",
           primaryColor: "#FF2E32",
-          cardOpacity: 0.0,
+          cardOpacity: 0.1,
           themeMode: "dark",
+          columnsCount: 6,
+          cardSize: 100,
+          simpleMode: true,
+          openInNewTab: false,
           language: "en",
-          showSearchBar: false,
+          showSearchBar: true,
+          searchSize: 100
         },
         pages: [
           {
-            id: `page-home`,
+            id: "page-1775807211776",
             title: "Home",
             groups: [
               {
-                id: `group-1`,
-                title: "Favorite Sites",
+                id: "group-1775810788757",
+                title: "ساعة رقمية",
                 column: 0,
                 order: 0,
-                sites: [
-                  { id: "site-1", name: "Google", url: "https://google.com" },
-                  { id: "site-2", name: "YouTube", url: "https://youtube.com" },
-                  { id: "site-3", name: "GitHub", url: "https://github.com" },
-                ],
+                sites: []
               },
-            ],
+              {
+                id: "group-1775807409644",
+                title: "My Websites",
+                column: 5,
+                order: 1,
+                sites: [
+                  {
+                    id: "site-1775817256443",
+                    name: "Google",
+                    url: "https://www.google.com",
+                    desc: "It is Google :>"
+                  },
+                  {
+                    id: "site-1775818719399",
+                    name: "Github",
+                    url: "https://github.com/yasser8111",
+                    desc: "My Profile."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            id: "page-1775818411308",
+            title: "New Page",
+            groups: []
           }
         ],
-        activePageId: `page-home`,
-        customTemplates: [],
+        activePageId: "page-1775807211776",
+        customTemplates: [
+          {
+            id: "tem-custom-1775776037938",
+            name: "Yasser",
+            type: "video",
+            url: "",
+            color: "#3b82f6",
+            opacity: 0.5,
+            theme: "dark",
+            isCustom": true
+          }
+        ]
       };
     }
 

@@ -510,22 +510,22 @@ class AppController {
           settings.columnsCount = 6;
           settings.cardSize = 100;
           settings.searchSize = 100;
-          settings.simpleMode = false;
+          settings.simpleMode = true;
           settings.openInNewTab = false;
-          settings.showSearchBar = false;
+          settings.showSearchBar = true;
           settings.language = 'en';
           
           // Background/Appearance defaults
           settings.themeMode = 'dark';
           settings.primaryColor = '#FF2E32';
-          settings.cardOpacity = 0.0;
+          settings.cardOpacity = 0.1;
           settings.bgType = 'videoUrl';
           settings.bgImage = 'backgrounds/1111.mp4';
 
           // Update inputs if they exist
-          if (inputs.simpleMode) inputs.simpleMode.checked = false;
+          if (inputs.simpleMode) inputs.simpleMode.checked = true;
           if (inputs.openInNewTab) inputs.openInNewTab.checked = false;
-          if (inputs.showSearchBar) inputs.showSearchBar.checked = false;
+          if (inputs.showSearchBar) inputs.showSearchBar.checked = true;
           if (inputs.language) inputs.language.value = 'en';
           
           this.stateManager.save();
