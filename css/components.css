@@ -177,15 +177,6 @@
   padding-inline-end: 50px;
 }
 
-.group-settings-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: all 0.2s ease;
-}
 
 .group-header-actions {
   position: absolute;
@@ -201,11 +192,6 @@
   z-index: 5;
 }
 
-.group-card:hover .group-settings-wrap {
-  width: auto;
-  opacity: 1;
-  margin-inline-start: 8px;
-}
 
 .group-card:not(.is-renaming):hover .group-header-actions {
   opacity: 1;
@@ -216,7 +202,6 @@
   display: none !important;
 }
 
-.group-settings-btn,
 .group-action-btn {
   background: none;
   border: none;
@@ -226,8 +211,7 @@
   opacity: 0;
   transition:
     background-color 0.2s,
-    opacity 0.2s,
-    transform 0.2s;
+    opacity 0.2s;
   padding: 6px;
   border-radius: 8px;
   display: flex;
@@ -235,14 +219,11 @@
   justify-content: center;
 }
 
-.group-settings-btn:hover,
 .group-action-btn:hover,
-.group-card:not(.is-renaming):hover .group-settings-btn,
 .group-card:not(.is-renaming):hover .group-action-btn {
   opacity: 1;
 }
 
-.group-settings-btn:hover,
 .group-action-btn:hover {
   background: rgba(148, 163, 184, 0.2);
 }
@@ -257,90 +238,6 @@
   background: rgba(var(--primary-color-rgb), 0.1) !important;
 }
 
-.clock-widget-settings {
-  display: flex !important;
-  align-items: center;
-  gap: 4px;
-}
-
-.group-dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  inset-inline-end: 0;
-  background: rgba(var(--card-bg-rgb), 0.98);
-  border: 1px solid var(--border-color);
-  backdrop-filter: blur(var(--modal-blur));
-  -webkit-backdrop-filter: blur(var(--modal-blur));
-  border-radius: var(--radius-md);
-  padding: 6px;
-  display: none;
-  flex-direction: column;
-  gap: 2px;
-  z-index: 9999;
-  min-width: 160px;
-  width: max-content;
-  max-width: 280px;
-  box-shadow:
-    var(--shadow-lg),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
-  transform-origin: top right;
-  animation: dropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Ensure dropdowns on the edge of the board flip direction to stay within screen */
-[dir="rtl"] .board-column:last-child .group-dropdown,
-[dir="rtl"] .board-column:nth-last-child(2) .group-dropdown {
-  right: auto;
-  left: 0;
-  transform-origin: top left;
-}
-
-[dir="ltr"] .board-column:last-child .group-dropdown,
-[dir="ltr"] .board-column:nth-last-child(2) .group-dropdown {
-  left: auto;
-  right: 0;
-  transform-origin: top right;
-}
-
-@keyframes dropdownIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.group-dropdown.show {
-  display: flex;
-}
-
-.group-dropdown button {
-  background: none;
-  border: none;
-  color: var(--text-color);
-  padding: 10px 14px;
-  text-align: start;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-}
-
-.group-dropdown button:hover {
-  background: var(--site-hover-bg);
-}
-
-.delete-dropdown-btn {
-  color: var(--danger-color) !important;
-}
 
 /* Site List container */
 .site-list {
@@ -893,6 +790,57 @@ body.simple-mode .header-btn {
   opacity: 0.5;
 }
 
+.suggestion-item-inner {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+}
+
+.suggestion-item-icon {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.suggestion-item-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-inline-start: 12px;
+  font-weight: 500;
+}
+
+.suggestion-item-url {
+  font-size: 11px;
+  opacity: 0.45;
+  margin-inline-start: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.suggestion-highlight {
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+.suggestion-no-results {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-color);
+  opacity: 0.6;
+  font-size: 13px;
+}
+
+.suggestion-no-results i {
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -985,4 +933,20 @@ body.simple-mode .header-btn {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
   pointer-events: auto;
+}
+
+/* Widget Utilities */
+.digital-time-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.clock-indicator {
+  font-size: 1.2rem;
+  line-height: 1;
+  font-weight: 700;
+  opacity: 0.7;
+  text-transform: uppercase;
 }

@@ -10,6 +10,9 @@ class AppController {
     this.searchEngine = new SearchEngine(this.stateManager);
 
     this.sortableInstances = [];
+    this.el = {}; // DOM cache
+    this._cacheElements();
+    
     this._bindStaticEvents();
 
     // Performance: Debounce recursive rendering/saving
@@ -17,6 +20,41 @@ class AppController {
     this.debouncedSaveState = window.utils.debounce(() => this.stateManager.save(), 500);
   }
 
+  /**
+   * Caches common DOM elements for performance.
+   * @private
+   */
+  _cacheElements() {
+    this.el = {
+      addPageBtn: document.getElementById("addPageBtn"),
+      customizeBtn: document.getElementById("customizeBtn"),
+      settingsBtn: document.getElementById("settingsBtn"),
+      templatesBtn: document.getElementById("templatesBtn"),
+      aboutBtn: document.getElementById("aboutBtn"),
+      saveCustomizeBtn: document.getElementById("saveCustomizeBtn"),
+      cancelCustomizeBtn: document.getElementById("cancelCustomizeBtn"),
+      closeCustomizeX: document.getElementById("closeCustomizeX"),
+      saveSettingsBtn: document.getElementById("saveSettingsBtn"),
+      cancelSettingsBtn: document.getElementById("cancelSettingsBtn"),
+      closeSettingsX: document.getElementById("closeSettingsX"),
+      closeTemplatesX: document.getElementById("closeTemplatesX"),
+      closeAboutBtn: document.getElementById("closeAboutBtn"),
+      closeAboutX: document.getElementById("closeAboutX"),
+      exportDataBtn: document.getElementById("exportDataBtn"),
+      importDataBtn: document.getElementById("importDataBtn"),
+      importFileInput: document.getElementById("importFileInput"),
+      colorHexLabel: document.getElementById("colorHexLabel"),
+      colCountInput: document.getElementById("colCountInput"),
+      cardSizeInput: document.getElementById("cardSizeInput"),
+      searchSizeInput: document.getElementById("searchSizeInput"),
+      searchInput: document.getElementById("searchInput"),
+      searchSuggestions: document.getElementById("searchSuggestions")
+    };
+  }
+
+  /**
+   * Initializes the application, loads translations, and renders initial UI.
+   */
   async init() {
     try {
         const resp = await fetch('js/translations.json');
@@ -281,142 +319,133 @@ class AppController {
     }
   }
 
-  _fetchSiteTitle(url) {
-    try {
-      const parsedUrl = new URL(url);
-      const hostname = parsedUrl.hostname.replace("www.", "");
-      // Clean domain name: e.g. "google.com" -> "Google"
-      const parts = hostname.split(".");
-      const name = parts[0];
-      return name.charAt(0).toUpperCase() + name.slice(1);
-    } catch {
-      return "";
+  /**
+   * Helper to bind modal open/close actions.
+   * @private
+   */
+  _bindModalHandlers(modalKey, openTrigger, closeTriggers = []) {
+    if (openTrigger) {
+      openTrigger.addEventListener("click", () => this.ui.toggleModal(modalKey, true));
     }
+    closeTriggers.forEach(trigger => {
+      if (trigger) {
+        trigger.addEventListener("click", () => this.ui.toggleModal(modalKey, false));
+      }
+    });
   }
 
+  /**
+   * Binds static event listeners once on application startup.
+   * @private
+   */
   _bindStaticEvents() {
     const { inputs, containers } = this.ui.elements;
 
-    const addPageBtn = document.getElementById("addPageBtn");
-    if (addPageBtn) {
-      addPageBtn.addEventListener("click", () => this._addPage());
+    if (this.el.addPageBtn) {
+      this.el.addPageBtn.addEventListener("click", () => this._addPage());
     }
 
     this._initSearchSuggestions();
 
-    document.getElementById("customizeBtn").addEventListener("click", () => {
-      const settings = this.stateManager.getState().settings;
-      inputs.themeMode.checked = settings.themeMode === "light";
-      inputs.primaryColor.value = settings.primaryColor;
-      inputs.cardOpacity.value = settings.cardOpacity;
+    // Customize Modal
+    if (this.el.customizeBtn) {
+      this.el.customizeBtn.addEventListener("click", () => {
+        const settings = this.stateManager.getState().settings;
+        inputs.themeMode.checked = settings.themeMode === "light";
+        inputs.primaryColor.value = settings.primaryColor;
+        inputs.cardOpacity.value = settings.cardOpacity;
 
-      const hexLabel = document.getElementById("colorHexLabel");
-      if (hexLabel) hexLabel.value = settings.primaryColor.toUpperCase();
+        if (this.el.colorHexLabel) this.el.colorHexLabel.value = settings.primaryColor.toUpperCase();
+        this.originalCustomizeSettings = JSON.parse(JSON.stringify(settings));
 
-      this.originalCustomizeSettings = JSON.parse(JSON.stringify(settings));
+        if (containers.opacityValue) {
+          containers.opacityValue.textContent = `${Math.round(settings.cardOpacity * 100)}%`;
+        }
 
-      if (containers.opacityValue) {
-        containers.opacityValue.textContent = `${Math.round(settings.cardOpacity * 100)}%`;
-      }
+        const labelStrong = containers.fileUploadLabel.querySelector("strong span") || containers.fileUploadLabel.querySelector("strong");
+        const labelSpan = containers.fileUploadLabel.querySelector(".upload-sub-text");
+        
+        if (labelStrong) {
+          labelStrong.textContent = settings.bgType.startsWith("local")
+            ? this.ui.getTranslation("local_file_in_use")
+            : this.ui.getTranslation("upload_bg");
+        }
+        if (labelSpan) {
+          labelSpan.textContent = settings.bgType.startsWith("local")
+            ? this.ui.getTranslation("custom_bg_active")
+            : this.ui.getTranslation("upload_sub");
+        }
 
-      const labelStrong = containers.fileUploadLabel.querySelector("strong span") || containers.fileUploadLabel.querySelector("strong");
-      const labelSpan = containers.fileUploadLabel.querySelector(".upload-sub-text");
-      
-      if (labelStrong) {
-        labelStrong.textContent = settings.bgType.startsWith("local")
-          ? this.ui.getTranslation("local_file_in_use")
-          : this.ui.getTranslation("upload_bg");
-      }
-      if (labelSpan) {
-        labelSpan.textContent = settings.bgType.startsWith("local")
-          ? this.ui.getTranslation("custom_bg_active")
-          : this.ui.getTranslation("upload_sub");
-      }
-
-      this.ui.updateUserMediaPreview(this.mediaStorage, settings);
-      this.ui.toggleModal("customize", true);
-    });
-
-    const closeCustomizeX = document.getElementById("closeCustomizeX");
-    if (closeCustomizeX) {
-      closeCustomizeX.addEventListener("click", () =>
-        this.ui.toggleModal("customize", false),
-      );
-    }
-
-    document.getElementById("settingsBtn").addEventListener("click", () => {
-      const settings = this.stateManager.getState().settings;
-      if (inputs.colCount) inputs.colCount.value = settings.columnsCount || 6;
-      if (inputs.cardSize) inputs.cardSize.value = settings.cardSize || 100;
-      if (inputs.searchSize) inputs.searchSize.value = settings.searchSize || 100;
-      if (inputs.simpleMode)
-        inputs.simpleMode.checked = settings.simpleMode || false;
-      if (inputs.openInNewTab)
-        inputs.openInNewTab.checked = settings.openInNewTab || false;
-      if (inputs.showSearchBar)
-        inputs.showSearchBar.checked = settings.showSearchBar || false;
-      if (inputs.enableHistorySearch)
-        inputs.enableHistorySearch.checked = settings.enableHistorySearch !== false; // default true
-      if (inputs.language) inputs.language.value = settings.language || "ar";
-      if (inputs.hideScrollbar)
-        inputs.hideScrollbar.checked = settings.hideScrollbar || false;
-      if (containers.colCountValue)
-        containers.colCountValue.textContent = settings.columnsCount || 6;
-      if (containers.cardSizeValue)
-        containers.cardSizeValue.textContent = (settings.cardSize || 100) + "%";
-      if (containers.searchSizeValue)
-        containers.searchSizeValue.textContent = (settings.searchSize || 100) + "%";
-
-      if (containers.searchSizeControlWrap) {
-        containers.searchSizeControlWrap.style.display = settings.showSearchBar ? "block" : "none";
-      }
-
-      this.ui.toggleModal("settings", true);
-    });
-
-    const closeSettingsX = document.getElementById("closeSettingsX");
-    if (closeSettingsX) {
-      closeSettingsX.addEventListener("click", () =>
-        this.ui.toggleModal("settings", false),
-      );
-    }
-
-    document.getElementById("templatesBtn").addEventListener("click", async () => {
-      await this.ui.renderTemplates((template) => this._onSelectTemplate(template), this.mediaStorage);
-      this.ui.toggleModal("templates", true);
-    });
-
-    const aboutBtn = document.getElementById("aboutBtn");
-    if (aboutBtn) {
-      aboutBtn.addEventListener("click", () => {
-        this.ui.toggleModal("about", true);
+        this.ui.updateUserMediaPreview(this.mediaStorage, settings);
+        this.ui.toggleModal("customize", true);
       });
     }
 
-    const closeAboutBtn = document.getElementById("closeAboutBtn");
-    if (closeAboutBtn) {
-      closeAboutBtn.addEventListener("click", () => {
-        this.ui.toggleModal("about", false);
+    this.el.cancelCustomizeBtn.addEventListener("click", () => {
+      if (this.originalCustomizeSettings) {
+        const state = this.stateManager.getState();
+        Object.assign(state.settings, this.originalCustomizeSettings);
+      }
+      this.ui.toggleModal("customize", false);
+    });
+
+    if (this.el.closeCustomizeX) {
+      this.el.closeCustomizeX.addEventListener("click", () => {
+        if (this.originalCustomizeSettings) {
+          const state = this.stateManager.getState();
+          Object.assign(state.settings, this.originalCustomizeSettings);
+        }
+        this.ui.toggleModal("customize", false);
       });
     }
 
-    const closeAboutX = document.getElementById("closeAboutX");
-    if (closeAboutX) {
-      closeAboutX.addEventListener("click", () => {
-        this.ui.toggleModal("about", false);
+    // Settings Modal
+    if (this.el.settingsBtn) {
+      this.el.settingsBtn.addEventListener("click", () => {
+        const settings = this.stateManager.getState().settings;
+        if (inputs.colCount) inputs.colCount.value = settings.columnsCount || 6;
+        if (inputs.cardSize) inputs.cardSize.value = settings.cardSize || 100;
+        if (inputs.searchSize) inputs.searchSize.value = settings.searchSize || 100;
+        if (inputs.simpleMode) inputs.simpleMode.checked = settings.simpleMode || false;
+        if (inputs.openInNewTab) inputs.openInNewTab.checked = settings.openInNewTab || false;
+        if (inputs.showSearchBar) inputs.showSearchBar.checked = settings.showSearchBar || false;
+        if (inputs.enableHistorySearch) inputs.enableHistorySearch.checked = settings.enableHistorySearch !== false;
+        if (inputs.language) inputs.language.value = settings.language || "ar";
+        if (inputs.hideScrollbar) inputs.hideScrollbar.checked = settings.hideScrollbar || false;
+        
+        if (containers.colCountValue) containers.colCountValue.textContent = settings.columnsCount || 6;
+        if (containers.cardSizeValue) containers.cardSizeValue.textContent = (settings.cardSize || 100) + "%";
+        if (containers.searchSizeValue) containers.searchSizeValue.textContent = (settings.searchSize || 100) + "%";
+
+        if (containers.searchSizeControlWrap) {
+          containers.searchSizeControlWrap.style.display = settings.showSearchBar ? "block" : "none";
+        }
+        this.ui.toggleModal("settings", true);
       });
     }
+    
+    this._bindModalHandlers("settings", null, [this.el.cancelSettingsBtn, this.el.closeSettingsX]);
 
-    const exportDataBtn = document.getElementById("exportDataBtn");
-    if (exportDataBtn) {
-      exportDataBtn.addEventListener("click", () => this._exportData());
+    // Templates Modal
+    if (this.el.templatesBtn) {
+      this.el.templatesBtn.addEventListener("click", async () => {
+        await this.ui.renderTemplates((template) => this._onSelectTemplate(template), this.mediaStorage);
+        this.ui.toggleModal("templates", true);
+      });
+    }
+    this._bindModalHandlers("templates", null, [this.el.closeTemplatesX]);
+
+    // About Modal
+    this._bindModalHandlers("about", this.el.aboutBtn, [this.el.closeAboutBtn, this.el.closeAboutX]);
+
+    // Data Management
+    if (this.el.exportDataBtn) {
+      this.el.exportDataBtn.addEventListener("click", () => this._exportData());
     }
 
-    const importDataBtn = document.getElementById("importDataBtn");
-    const importFileInput = document.getElementById("importFileInput");
-    if (importDataBtn && importFileInput) {
-      importDataBtn.addEventListener("click", () => importFileInput.click());
-      importFileInput.addEventListener("change", (e) => this._importData(e));
+    if (this.el.importDataBtn && this.el.importFileInput) {
+      this.el.importDataBtn.addEventListener("click", () => this.el.importFileInput.click());
+      this.el.importFileInput.addEventListener("change", (e) => this._importData(e));
     }
 
     inputs.bgFile.addEventListener("change", async (e) => {
@@ -666,7 +695,7 @@ class AppController {
       }
     });
 
-    // Auto-fetch site name from URL when user leaves the URL field
+    // Auto-fill site name from URL domain when user leaves the URL field
     if (inputs.siteUrl) {
       inputs.siteUrl.addEventListener("blur", () => {
         const url = inputs.siteUrl.value.trim();
@@ -678,12 +707,12 @@ class AppController {
           const loader = document.getElementById("siteNameLoader");
           if (loader) loader.classList.remove("hidden");
 
-          // Brief delay for premium feel
           setTimeout(() => {
-            const fetchedName = this._fetchSiteTitle(normalizedUrl);
-            if (fetchedName) {
-              inputs.siteName.value = fetchedName;
-            }
+            try {
+              const domain = new URL(normalizedUrl).hostname.replace("www.", "");
+              const name = domain.split(".")[0];
+              inputs.siteName.value = name.charAt(0).toUpperCase() + name.slice(1);
+            } catch { /* invalid URL, skip */ }
             if (loader) loader.classList.add("hidden");
           }, 400);
         }
@@ -703,17 +732,12 @@ class AppController {
       );
     }
 
-    document.addEventListener(
-      "click",
-      () => {
-        this.ui.closeDropdowns();
-        // Resume video if it was blocked by autoplay policy
-        if (this.ui.elements.bgVideo && this.ui.elements.bgVideo.paused) {
-          this.ui.elements.bgVideo.play().catch((e) => {});
-        }
-      },
-      { once: false },
-    );
+    // Resume video if it was blocked by autoplay policy
+    document.addEventListener("click", () => {
+      if (this.ui.elements.bgVideo && this.ui.elements.bgVideo.paused) {
+        this.ui.elements.bgVideo.play().catch(() => {});
+      }
+    });
 
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
       overlay.addEventListener('click', (e) => {
@@ -951,46 +975,39 @@ class AppController {
   }
 
   /**
+   * Filters out internal browser pages (chrome://, edge://, about:, extensions).
+   * @param {Array} tabs - Array of chrome.tabs.Tab objects
+   * @returns {Array} Only user-navigable tabs
+   */
+  _filterValidTabs(tabs) {
+    const INTERNAL_PREFIXES = ['chrome://', 'chrome-extension://', 'about:', 'edge://'];
+    return tabs.filter(t => t.url && !INTERNAL_PREFIXES.some(p => t.url.startsWith(p)));
+  }
+
+  /**
    * Alt + S: Add the most recently accessed real tab as a site in a new group.
    * Since the user is on the new tab page (extension page), the "active" tab
    * is the extension itself. We find the last real tab the user was on instead.
    */
   async _addCurrentTab() {
-    if (typeof chrome === 'undefined' || !chrome.tabs) {
-      console.warn('chrome.tabs API not available');
-      return;
-    }
+    if (typeof chrome === 'undefined' || !chrome.tabs) return;
     try {
       const allTabs = await chrome.tabs.query({ currentWindow: true });
-      // Filter out internal browser and extension pages
-      const realTabs = allTabs.filter(t =>
-        t.url &&
-        !t.url.startsWith('chrome://') &&
-        !t.url.startsWith('chrome-extension://') &&
-        !t.url.startsWith('about:') &&
-        !t.url.startsWith('edge://')
-      );
+      const realTabs = this._filterValidTabs(allTabs);
 
       if (realTabs.length === 0) {
         this._showToast(this.ui.getTranslation('no_valid_tab') || 'No valid tab to add');
         return;
       }
 
-      // Pick the most recently accessed tab
       const targetTab = realTabs.sort((a, b) => (b.lastAccessed || 0) - (a.lastAccessed || 0))[0];
-
       const siteName = targetTab.title || new URL(targetTab.url).hostname;
       const groupId = this._addGroup();
       if (groupId) {
         const group = this._findGroup(groupId);
         if (group) {
           group.title = siteName;
-          group.sites.push({
-            id: `site-${Date.now()}`,
-            name: siteName,
-            url: targetTab.url,
-            desc: ''
-          });
+          group.sites.push({ id: `site-${Date.now()}`, name: siteName, url: targetTab.url, desc: '' });
           this.stateManager.save();
           this.renderAll();
         }
@@ -1005,14 +1022,10 @@ class AppController {
    * Alt + A: Collect ALL open tabs in the current window and put them into a single new group.
    */
   async _addAllTabsToGroup() {
-    if (typeof chrome === 'undefined' || !chrome.tabs) {
-      console.warn('chrome.tabs API not available');
-      return;
-    }
+    if (typeof chrome === 'undefined' || !chrome.tabs) return;
     try {
-      const tabs = await chrome.tabs.query({ currentWindow: true });
-      // Filter out chrome:// and extension pages
-      const validTabs = tabs.filter(t => t.url && !t.url.startsWith('chrome://') && !t.url.startsWith('chrome-extension://'));
+      const allTabs = await chrome.tabs.query({ currentWindow: true });
+      const validTabs = this._filterValidTabs(allTabs);
       if (validTabs.length === 0) {
         this._showToast(this.ui.getTranslation('no_valid_tabs') || 'No valid tabs to collect');
         return;
@@ -1021,7 +1034,6 @@ class AppController {
       if (groupId) {
         const group = this._findGroup(groupId);
         if (group) {
-          const dateStr = new Date().toLocaleDateString();
           group.title = (this.ui.getTranslation('collected_tabs') || 'Collected Tabs') + ` (${validTabs.length})`;
           validTabs.forEach(tab => {
             group.sites.push({
@@ -1041,9 +1053,13 @@ class AppController {
     }
   }
 
+  /**
+   * Initializes search suggestions logic and event listeners.
+   * @private
+   */
   _initSearchSuggestions() {
-    const searchInput = document.getElementById("searchInput");
-    const suggestionsBox = document.getElementById("searchSuggestions");
+    const searchInput = this.el.searchInput;
+    const suggestionsBox = this.el.searchSuggestions;
     if (!searchInput || !suggestionsBox) return;
 
     let selectedIndex = -1;
@@ -1059,8 +1075,6 @@ class AppController {
         window.open(suggestion.url, target);
       } else {
         const query = suggestion.text.trim();
-        
-        // Regex to check if it looks like a URL (starts with protocol or is a domain.tld)
         const isUrl = /^https?:\/\//i.test(query) || 
                       /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}(:\d+)?(\/.*)?$/i.test(query);
 
@@ -1068,7 +1082,6 @@ class AppController {
           const finalUrl = /^https?:\/\//i.test(query) ? query : `https://${query}`;
           window.open(finalUrl, target);
         } else {
-          // It's a search term
           const state = this.stateManager.getState();
           state.searchHistory = state.searchHistory || [];
           state.searchHistory = state.searchHistory.filter(h => h !== query);
@@ -1083,10 +1096,8 @@ class AppController {
 
       if (!currentSettings.openInNewTab) {
         searchInput.value = "";
-        suggestionsBox.classList.add("hidden");
-      } else {
-        suggestionsBox.classList.add("hidden");
       }
+      suggestionsBox.classList.add("hidden");
     };
 
     const handleInput = async () => {
@@ -1104,47 +1115,50 @@ class AppController {
     });
 
     searchInput.addEventListener("keydown", (e) => {
-      if (suggestionsBox.classList.contains("hidden")) {
-        if (e.key === "Enter" && searchInput.value.trim()) {
-           performAction({ type: "search", text: searchInput.value.trim(), url: "search_action" });
+      if (e.key === "Enter") {
+        if (selectedIndex >= 0 && currentSuggestions[selectedIndex]) {
+          performAction(currentSuggestions[selectedIndex]);
+        } else if (searchInput.value.trim()) {
+          performAction({ text: searchInput.value.trim(), type: "search" });
         }
-        return;
-      }
-
-      if (currentSuggestions.length === 0 && e.key === "Enter") {
+      } else if (e.key === "ArrowDown") {
         e.preventDefault();
-        if (searchInput.value.trim()) {
-          performAction({ type: "search", text: searchInput.value.trim(), url: "search_action" });
-        }
-        return;
-      }
-
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        selectedIndex = (selectedIndex + 1) % currentSuggestions.length;
-        this.ui.updateSearchSelection(selectedIndex);
+        selectedIndex = Math.min(selectedIndex + 1, currentSuggestions.length - 1);
+        this.ui.renderSearchSuggestions(currentSuggestions, selectedIndex, performAction);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        selectedIndex = (selectedIndex - 1 + currentSuggestions.length) % currentSuggestions.length;
-        this.ui.updateSearchSelection(selectedIndex);
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        if (selectedIndex >= 0 && selectedIndex < currentSuggestions.length) {
-          performAction(currentSuggestions[selectedIndex]);
-        } else {
-          performAction(currentSuggestions[0] || { type: "search", text: searchInput.value.trim(), url: "search_action" });
-        }
+        selectedIndex = Math.max(selectedIndex - 1, -1);
+        this.ui.renderSearchSuggestions(currentSuggestions, selectedIndex, performAction);
       } else if (e.key === "Escape") {
         suggestionsBox.classList.add("hidden");
-        selectedIndex = -1;
         searchInput.blur();
       }
     });
 
+    // Handle clicks outside of search
     document.addEventListener("click", (e) => {
-      if (!e.target.closest(".search-box-container")) {
+      if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
         suggestionsBox.classList.add("hidden");
       }
     });
+  }
+
+  /**
+   * Shows a temporary toast message to the user.
+   * @param {string} msg 
+   * @private
+   */
+  _showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }, 100);
   }
 }

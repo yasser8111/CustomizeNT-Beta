@@ -1,16 +1,8 @@
 /**
  * WidgetManager
- * Handles detection and rendering of special group widgets.
+ * Handles detection and rendering of special group widgets (Clocks, Notes, etc.).
  *
- * To add a new widget:
- *   1. Call this.register('type', { triggers, requireEmpty, aspectSquare, render })
- *   2. Add corresponding CSS styles in components.css
- *
- * render(group, groupEl, actions, ui) receives:
- *   - group: the group data object (may include widgetData)
- *   - groupEl: the .group-card DOM element to populate
- *   - actions: { onRenameGroup, onDeleteGroup, onSaveWidgetData, ... }
- *   - ui: UIManager instance for translations and dropdown creation
+ * @class WidgetManager
  */
 class WidgetManager {
   constructor() {
@@ -20,20 +12,17 @@ class WidgetManager {
 
   /**
    * Register a widget type.
-   * @param {string} type        Unique widget identifier
-   * @param {Object} config
-   * @param {string[]} config.triggers      Lowercase titles that activate this widget
-   * @param {boolean}  config.requireEmpty  Only activate when group.sites is empty
-   * @param {boolean}  config.aspectSquare  Apply 1:1 aspect ratio (like clocks)
-   * @param {Function} config.render        (group, groupEl, actions, ui) => void
+   * @param {string} type - Unique identifier.
+   * @param {Object} config - Widget configuration.
    */
   register(type, config) {
     this.widgets.set(type, config);
   }
 
   /**
-   * Detect if a group should render as a widget.
-   * @returns {string|null} Widget type or null
+   * Detect if a group should render as a widget based on its title.
+   * @param {Object} group 
+   * @returns {string|null}
    */
   detect(group) {
     const title = group.title.trim().toLowerCase();
@@ -58,11 +47,9 @@ class WidgetManager {
     config.render(group, groupEl, actions, ui);
   }
 
-  // ─── Helpers ───────────────────────────────────────────────
-
   /**
-   * Start a recurring interval that auto-clears when the anchor element
-   * is removed from the DOM.
+   * Start a recurring interval that auto-clears when the anchor element is removed.
+   * @private
    */
   _startInterval(anchorEl, updateFn, ms = 1000) {
     updateFn();
@@ -76,14 +63,13 @@ class WidgetManager {
   }
 
   /**
-   * Create a minimal widget dropdown with DELETE only.
-   * Used by all widgets (clocks, text, etc.)
+   * Create a widget delete button.
+   * @private
    */
   _createWidgetDeleteBtn(group, actions, ui) {
-    const btn = document.createElement('button');
+    const btn = ui._createLucideIcon('trash-2', { width: 14, height: 14, strokeWidth: "1.5" });
     btn.className = 'widget-delete-btn';
-    btn.setAttribute('aria-label', ui.getTranslation('delete_group_btn'));
-    btn.innerHTML = '<i data-lucide="trash-2" width="14" height="14" stroke-width="1.5" aria-hidden="true"></i>';
+    btn.setAttribute('aria-label', ui.getTranslation('delete_group'));
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (confirm(ui.getTranslation('delete_group_confirm'))) {
@@ -93,13 +79,8 @@ class WidgetManager {
     return btn;
   }
 
-  // ─── Built-in Widgets ──────────────────────────────────────
-
   _registerBuiltinWidgets() {
-
-    // ╔══════════════════════════════════╗
-    // ║        Analog Clock             ║
-    // ╚══════════════════════════════════╝
+    // Analog Clock
     this.register('analog-clock', {
       triggers: ['analog_clock'],
       requireEmpty: true,
@@ -142,9 +123,7 @@ class WidgetManager {
       }
     });
 
-    // ╔══════════════════════════════════╗
-    // ║        Digital Clock            ║
-    // ╚══════════════════════════════════╝
+    // Digital Clock
     this.register('digital-clock', {
       triggers: ['digital_clock'],
       requireEmpty: true,
@@ -157,7 +136,7 @@ class WidgetManager {
         clockWrap.className = 'clock-widget';
 
         const timeWrap = document.createElement('div');
-        timeWrap.style.cssText = 'display:flex;flex-direction:row;align-items:baseline;gap:8px;';
+        timeWrap.className = 'digital-time-wrap';
 
         const timeEl = document.createElement('div');
         timeEl.className = 'clock-time';
@@ -166,7 +145,6 @@ class WidgetManager {
         const ampmEl = document.createElement('div');
         ampmEl.className = 'clock-indicator';
         ampmEl.textContent = 'A';
-        ampmEl.style.cssText = 'font-size:1.2rem;line-height:1;font-weight:700;opacity:0.7;text-transform:uppercase;';
 
         timeWrap.appendChild(timeEl);
         timeWrap.appendChild(ampmEl);
@@ -184,15 +162,12 @@ class WidgetManager {
       }
     });
 
-    // ╔══════════════════════════════════╗
-    // ║        Text / Notes Widget      ║
-    // ╚══════════════════════════════════╝
+    // Text / Notes Widget
     this.register('text-note', {
       triggers: ['text', 'نص', 'note', 'notes', 'ملاحظة'],
       requireEmpty: true,
       aspectSquare: false,
       render: (group, groupEl, actions, ui) => {
-        // Initialize widget data on first render
         if (!group.widgetData || group.widgetData.text === undefined) {
           group.widgetData = group.widgetData || {};
           const defaultTitle = ui.getTranslation('text_widget_title') || 'Title';
@@ -203,14 +178,11 @@ class WidgetManager {
           }
         }
 
-        // Delete-only dropdown (no header)
         groupEl.appendChild(this._createWidgetDeleteBtn(group, actions, ui));
 
-        // Content area (fills the whole card)
         const contentArea = document.createElement('div');
         contentArea.className = 'text-widget-content';
 
-        // Parse and render text lines
         const renderText = (rawText) => {
           contentArea.innerHTML = '';
           contentArea.classList.remove('editing');
@@ -238,10 +210,8 @@ class WidgetManager {
 
         renderText(group.widgetData.text);
 
-        // Double-click to enter edit mode
         contentArea.addEventListener('dblclick', (e) => {
           e.stopPropagation();
-          // Don't re-enter if already editing
           if (contentArea.querySelector('.text-widget-editor')) return;
 
           contentArea.classList.add('editing');
@@ -251,13 +221,11 @@ class WidgetManager {
           textarea.value = group.widgetData.text || '';
           textarea.dir = 'auto';
           textarea.spellcheck = false;
-          textarea.placeholder = '# Heading\nParagraph text...';
 
           contentArea.innerHTML = '';
           contentArea.appendChild(textarea);
           textarea.focus();
 
-          // Auto-resize on input
           const autoResize = () => {
             textarea.style.height = 'auto';
             textarea.style.height = textarea.scrollHeight + 'px';

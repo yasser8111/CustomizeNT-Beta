@@ -283,6 +283,22 @@
   min-height: 200px;
 }
 
+.add-template-card {
+  border: 2px dashed var(--primary-color) !important;
+  background: rgba(var(--card-bg-rgb), 0.05) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+}
+
+.template-create-title {
+  font-weight: 700;
+  color: var(--text-color);
+  font-size: 16px;
+}
+
 .template-preview {
   width: 100%;
   border-radius: var(--radius-xl);

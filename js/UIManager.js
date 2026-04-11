@@ -1,7 +1,9 @@
 /**
  * UIManager
- * Only concerns itself with reading state and updating the DOM visually.
- * Emits events via callbacks that the Controller listens to.
+ * Responsible for all DOM rendering and visual updates.
+ * Receives state data and renders it. Emits user actions via callbacks.
+ * 
+ * @class UIManager
  */
 class UIManager {
   constructor() {
@@ -52,6 +54,55 @@ class UIManager {
     };
 
     this.objectUrlBlob = null;
+  }
+
+  /**
+   * Selects all text inside a contentEditable element using the modern Selection API.
+   * Replaces the deprecated document.execCommand('selectAll').
+   * @param {HTMLElement} el - The element whose text content to select
+   */
+  _selectAllText(el) {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  /**
+   * Helper to create a video or image element for media preview.
+   * @private
+   */
+  _createMediaElement(src, isVideo, options = {}) {
+    if (isVideo) {
+      const video = document.createElement("video");
+      video.src = src;
+      video.muted = true;
+      video.autoplay = options.autoplay !== false;
+      video.loop = true;
+      video.playsInline = true;
+      if (options.className) video.className = options.className;
+      return video;
+    } else {
+      const img = document.createElement("div");
+      img.className = options.className || "preview-img-box";
+      img.style.backgroundImage = `url('${src}')`;
+      return img;
+    }
+  }
+
+  /**
+   * Creates a lucide icon and triggers the library to render it.
+   * @private
+   */
+  _createLucideIcon(iconName, attrs = {}) {
+    const i = document.createElement("i");
+    i.setAttribute("data-lucide", iconName);
+    Object.entries(attrs).forEach(([k, v]) => i.setAttribute(k, v));
+    if (typeof lucide !== "undefined") {
+      lucide.createIcons({ icons: { [iconName]: lucide.icons[iconName] }, nameAttr: 'data-lucide' });
+    }
+    return i;
   }
 
   async applySettings(settings, mediaStorage) {
@@ -188,38 +239,24 @@ class UIManager {
     );
   }
 
+  /**
+   * Updates the live preview in the customization modal.
+   * @param {MediaStorage} mediaStorage 
+   * @param {Object} [currentSettings] - Optional settings to preview instead of current state
+   */
   async updateUserMediaPreview(mediaStorage, currentSettings) {
     const container = this.elements.containers.userMediaPreview;
     if (!container) return;
 
-    const settings =
-      currentSettings || window.App?.stateManager?.getState()?.settings;
+    const settings = currentSettings || window.App?.stateManager?.getState()?.settings;
     if (!settings) return;
 
     container.innerHTML = "";
 
-    if (settings.bgType === "videoUrl") {
-      const video = document.createElement("video");
-      video.src = settings.bgImage;
-      video.muted = true;
-      video.autoplay = true;
-      video.loop = true;
-      video.style.width = "100%";
-      video.style.height = "100%";
-      video.style.objectFit = "cover";
-      container.appendChild(video);
-      return;
-    }
-
-    if (settings.bgType === "preset") {
-      const img = document.createElement("div");
-      img.className = "preview-img-box";
-      img.style.width = "100%";
-      img.style.height = "100%";
-      img.style.backgroundImage = `url('${settings.bgImage}')`;
-      img.style.backgroundSize = "cover";
-      img.style.backgroundPosition = "center";
-      container.appendChild(img);
+    if (settings.bgType === "videoUrl" || settings.bgType === "preset") {
+      const isVideo = settings.bgType === "videoUrl";
+      const el = this._createMediaElement(settings.bgImage, isVideo);
+      container.appendChild(el);
       return;
     }
 
@@ -230,27 +267,8 @@ class UIManager {
     }
 
     const url = URL.createObjectURL(media.file);
-
-    if (media.isVideo) {
-      const video = document.createElement("video");
-      video.src = url;
-      video.muted = true;
-      video.autoplay = true;
-      video.loop = true;
-      video.style.width = "100%";
-      video.style.height = "100%";
-      video.style.objectFit = "cover";
-      container.appendChild(video);
-    } else {
-      const img = document.createElement("div");
-      img.className = "preview-img-box";
-      img.style.width = "100%";
-      img.style.height = "100%";
-      img.style.backgroundImage = `url('${url}')`;
-      img.style.backgroundSize = "cover";
-      img.style.backgroundPosition = "center";
-      container.appendChild(img);
-    }
+    const el = this._createMediaElement(url, media.isVideo);
+    container.appendChild(el);
   }
 
   getFavicon(url) {
@@ -262,8 +280,12 @@ class UIManager {
     }
   }
 
+  /**
+   * Renders the grid of templates in the templates modal.
+   */
   async renderTemplates(onSelectTemplate, mediaStorage) {
     const grid = document.getElementById("templatesGrid");
+    if (!grid) return;
     grid.innerHTML = "";
 
     let customMediaBlobUrl = null;
@@ -277,43 +299,33 @@ class UIManager {
     }
 
     const state = window.App?.stateManager?.getState();
-    const customTemplates = state?.customTemplates || [];
+    const allTemplates = [...(state?.customTemplates || []), ...UI_TEMPLATES];
 
-    const allTemplates = [...customTemplates, ...UI_TEMPLATES];
-
-    // Add 'Create Template' card
+    // Create Template Item
     const createItem = document.createElement("div");
     createItem.className = "template-item add-template-card";
-    createItem.style.border = "2px dashed var(--primary-color)";
-    createItem.style.background = "rgba(var(--card-bg-rgb), 0.05)";
-    createItem.style.display = "flex";
-    createItem.style.flexDirection = "column";
-    createItem.style.alignItems = "center";
-    createItem.style.justifyContent = "center";
-    createItem.style.gap = "12px";
-    createItem.innerHTML = `
-      <i data-lucide="plus-circle" width="36" height="36" style="color: var(--primary-color);"></i>
-      <span style="font-weight: 700; color: var(--text-color); font-size: 16px;">${this.getTranslation("create_custom_template") || "إنشاء قالب خاص"}</span>
-    `;
+    
+    const plusIcon = this._createLucideIcon("plus-circle", { width: 36, height: 36, style: 'color: var(--primary-color)' });
+    const createLabel = document.createElement("span");
+    createLabel.className = "template-create-title";
+    createLabel.textContent = this.getTranslation("create_custom_template");
+    
+    createItem.appendChild(plusIcon);
+    createItem.appendChild(createLabel);
     createItem.addEventListener("click", () => {
       this.toggleModal("templates", false);
       this.toggleModal("customize", true);
     });
     grid.appendChild(createItem);
 
+    // Render Template List
     allTemplates.forEach((template) => {
       const item = document.createElement("div");
       item.className = "template-item";
 
-      const templateName =
-        this.getTranslation(template.id) !== template.id
+      const templateName = this.getTranslation(template.id) !== template.id
           ? this.getTranslation(template.id)
           : template.name || template.id;
-
-      item.setAttribute(
-        "aria-label",
-        `${this.getTranslation("aria_template")} ${templateName}`,
-      );
 
       let isVideo = template.type === "video";
       let renderUrl = template.url;
@@ -323,75 +335,76 @@ class UIManager {
         isVideo = customMediaIsVideo;
       }
 
-      const previewContent = isVideo
-        ? `<video src="${renderUrl || ""}" muted loop playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>`
-        : `<img src="${renderUrl || ""}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" alt="${templateName}" />`;
+      const previewContainer = document.createElement("div");
+      previewContainer.className = "template-preview";
+      previewContainer.style.background = template.color;
 
-      const badgeText = isVideo
-        ? this.getTranslation("video_badge")
-        : this.getTranslation("image_badge");
-      const themeText =
-        template.theme === "dark"
-          ? this.getTranslation("theme_dark")
-          : this.getTranslation("theme_light");
-
-      const deleteBtnStr = template.isCustom
-        ? `<button class="delete-template-btn" data-id="${template.id}" title="${this.getTranslation("delete_template") || "حذف القالب"}">
-             <i data-lucide="trash-2" width="16" height="16"></i>
-           </button>`
-        : "";
-
-      item.innerHTML = `
-                <div class="template-preview" style="background: ${template.color};">
-                    ${previewContent}
-                    ${deleteBtnStr}
-                    <div class="template-overlay">
-                        <span class="template-name-minimal">${templateName}</span>
-                        <div class="template-badges-row">
-                            <span class="template-badge-minimal">${badgeText}</span>
-                            <span class="template-badge-minimal">${themeText}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
+      const mediaEl = this._createMediaElement(renderUrl || "", isVideo, { autoplay: false });
+      mediaEl.style.width = "100%";
+      mediaEl.style.height = "100%";
+      mediaEl.style.objectFit = "cover";
+      previewContainer.appendChild(mediaEl);
 
       if (template.isCustom) {
-        const delBtn = item.querySelector(".delete-template-btn");
-        if (delBtn) {
-          delBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            if (
-              confirm(
-                this.getTranslation("delete_template_confirm") ||
-                  "هل أنت متأكد من حذف هذا القالب؟",
-              )
-            ) {
-              if (window.App) window.App.deleteCustomTemplate(template.id);
-            }
-          });
-        }
+        const delBtn = document.createElement("button");
+        delBtn.className = "delete-template-btn";
+        delBtn.title = this.getTranslation("delete_template");
+        delBtn.appendChild(this._createLucideIcon("trash-2", { width: 16, height: 16 }));
+        delBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (confirm(this.getTranslation("delete_template_confirm"))) {
+            if (window.App) window.App.deleteCustomTemplate(template.id);
+          }
+        });
+        previewContainer.appendChild(delBtn);
       }
 
-      // Hover to play/pause video logic
-      if (isVideo) {
-        const video = item.querySelector("video");
-        item.addEventListener("mouseenter", () => {
-          video.play().catch((e) => console.warn("Video play error:", e));
-        });
-        item.addEventListener("mouseleave", () => {
-          video.pause();
-        });
-      }
-
+      const overlay = document.createElement("div");
+      overlay.className = "template-overlay";
+      
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "template-name-minimal";
+      nameSpan.textContent = templateName;
+      
+      const badgeRow = document.createElement("div");
+      badgeRow.className = "template-badges-row";
+      
+      const typeBadge = document.createElement("span");
+      typeBadge.className = "template-badge-minimal";
+      typeBadge.textContent = isVideo ? this.getTranslation("video_badge") : this.getTranslation("image_badge");
+      
+      const themeBadge = document.createElement("span");
+      themeBadge.className = "template-badge-minimal";
+      themeBadge.textContent = template.theme === "dark" ? this.getTranslation("theme_dark") : this.getTranslation("theme_light");
+      
+      badgeRow.appendChild(typeBadge);
+      badgeRow.appendChild(themeBadge);
+      overlay.appendChild(nameSpan);
+      overlay.appendChild(badgeRow);
+      previewContainer.appendChild(overlay);
+      
+      item.appendChild(previewContainer);
       item.addEventListener("click", () => onSelectTemplate(template));
+
+      if (isVideo) {
+        item.addEventListener("mouseenter", () => mediaEl.play().catch(() => {}));
+        item.addEventListener("mouseleave", () => mediaEl.pause());
+      }
+
       grid.appendChild(item);
     });
 
-    if (typeof lucide !== "undefined") {
-      lucide.createIcons();
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons({ root: grid });
     }
   }
 
+  /**
+   * Renders the page tabs in the header.
+   * @param {Array} pages - List of pages.
+   * @param {string} activePageId - ID of the active page.
+   * @param {Object} actions - Actions for page management.
+   */
   renderPagesTabs(pages, activePageId, actions) {
     const tabsContainer = this.elements.containers.pagesTabs;
     if (!tabsContainer) return;
@@ -447,7 +460,6 @@ class UIManager {
 
       tabEl.appendChild(nameEl);
 
-      // Edit and Delete buttons for pages
       const actionsWrap = document.createElement("div");
       actionsWrap.className = "page-tab-actions";
 
@@ -487,10 +499,15 @@ class UIManager {
     });
 
     if (typeof lucide !== "undefined") {
-      lucide.createIcons();
+      lucide.createIcons({ root: tabsContainer });
     }
   }
 
+  /**
+   * Renders the board (columns and groups).
+   * @param {Array} groups - List of groups.
+   * @param {Object} actions - Actions for group management.
+   */
   renderBoard(groups, actions) {
     const { board } = this.elements;
     board.innerHTML = "";
@@ -516,12 +533,10 @@ class UIManager {
       targetCol.appendChild(groupEl);
     });
 
-    // Dynamic add-group placeholder on hover (JS-driven)
     columns.forEach((colEl, i) => {
       let placeholder = null;
 
       const createPlaceholder = () => {
-        // Don't show if dragging is active or already exists
         if (placeholder || document.body.classList.contains("dragging-active"))
           return;
 
@@ -536,8 +551,6 @@ class UIManager {
         placeholder.addEventListener("click", () => actions.onAddGroup(i));
         colEl.appendChild(placeholder);
 
-        // Performance: Don't call createIcons on mousemove!
-        // We can use a pre-rendered SVG or handle it once.
         if (typeof lucide !== "undefined") {
           lucide.createIcons({ nameAttr: "data-lucide", root: placeholder });
         }
@@ -552,13 +565,10 @@ class UIManager {
         }
       };
 
-      // Use a single delegated listener for cleaner logic
       colEl.addEventListener("mousemove", (e) => {
-        // If we are over a group-card, remove placeholder
         if (e.target.closest(".group-card")) {
           removePlaceholder();
         } else if (!placeholder) {
-          // If we are over the column empty space, create it
           createPlaceholder();
         }
       });
@@ -569,22 +579,26 @@ class UIManager {
     });
 
     if (typeof lucide !== "undefined") {
-      lucide.createIcons();
+      lucide.createIcons({ root: board });
     }
   }
 
+  /**
+   * Creates a group element.
+   * @param {Object} group - The group object.
+   * @param {Object} actions - Actions for group management.
+   * @returns {HTMLElement} The group element.
+   */
   _createGroupElement(group, actions) {
     const groupEl = document.createElement("div");
     groupEl.className = "group-card";
     groupEl.dataset.id = group.id;
 
-    // Delegate to WidgetManager if this group is a widget
     const widgetType = this.widgetManager.detect(group);
 
     if (widgetType) {
       this.widgetManager.render(widgetType, group, groupEl, actions, this);
     } else {
-      // Standard Group Rendering
       const headerEl = document.createElement("div");
       headerEl.className = "group-header";
 
@@ -597,7 +611,7 @@ class UIManager {
         e.stopPropagation();
         titleEl.contentEditable = true;
         titleEl.focus();
-        document.execCommand("selectAll", false, null);
+        this._selectAllText(titleEl);
         groupEl.classList.add("is-renaming");
       });
       titleEl.addEventListener("blur", (e) => {
@@ -625,19 +639,17 @@ class UIManager {
       const headerActions = document.createElement("div");
       headerActions.className = "group-header-actions";
 
-      const addBtn = document.createElement("button");
+      const addBtn = this._createLucideIcon("plus", { width: 16, height: 16 });
       addBtn.className = "group-action-btn add-site-action";
-      addBtn.innerHTML = '<i data-lucide="plus" width="16" height="16"></i>';
       addBtn.title = this.getTranslation("add_site");
       addBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         actions.onOpenAddSiteModal(group.id);
       });
 
-      const delBtn = document.createElement("button");
+      const delBtn = this._createLucideIcon("trash-2", { width: 15, height: 15 });
       delBtn.className = "group-action-btn delete-group-action";
-      delBtn.innerHTML = '<i data-lucide="trash-2" width="16" height="16"></i>';
-      delBtn.title = this.getTranslation("delete_group_btn");
+      delBtn.title = this.getTranslation("delete_group");
       delBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         if (confirm(this.getTranslation("delete_group_confirm"))) {
@@ -648,96 +660,27 @@ class UIManager {
       headerActions.appendChild(addBtn);
       headerActions.appendChild(delBtn);
       headerEl.appendChild(headerActions);
+
       groupEl.appendChild(headerEl);
 
       const listEl = document.createElement("div");
       listEl.className = "site-list";
-      listEl.dataset.groupId = group.id;
-
       group.sites.forEach((site) => {
         listEl.appendChild(this._createSiteElement(site, group.id, actions));
       });
-
       groupEl.appendChild(listEl);
     }
-
     return groupEl;
   }
 
-  _createGroupSettingsDropdown(group, actions, widgetType = null) {
-    const wrap = document.createElement("div");
-    wrap.className = "group-settings-wrap";
-
-    const triggerBtn = document.createElement("button");
-    triggerBtn.className = "group-settings-btn";
-    triggerBtn.setAttribute("aria-label", this.getTranslation("group_options"));
-    triggerBtn.innerHTML =
-      '<i data-lucide="ellipsis-vertical" width="16" height="16" stroke-width="1.5" aria-hidden="true"></i>';
-
-    const dropdown = document.createElement("div");
-    dropdown.className = "group-dropdown";
-
-    const renameBtn = document.createElement("button");
-    renameBtn.innerHTML = `<i data-lucide="pencil" width="14" height="14" stroke-width="1.5"></i> ${this.getTranslation("rename_group_btn")}`;
-    renameBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      dropdown.classList.remove("show");
-
-      // Trigger the title editing directly
-      const groupCard = dropdown.closest(".group-card");
-      const titleEl = groupCard.querySelector(".group-title");
-      if (titleEl) {
-        titleEl.contentEditable = true;
-        titleEl.focus();
-        document.execCommand("selectAll", false, null);
-      }
-    });
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "delete-dropdown-btn";
-    delBtn.innerHTML = `<i data-lucide="trash" width="14" height="14" stroke-width="1.5"></i> ${this.getTranslation("delete_group_btn")}`;
-    delBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (confirm(this.getTranslation("delete_group_confirm"))) {
-        actions.onDeleteGroup(group.id);
-      }
-    });
-
-    if (widgetType) {
-      // Clock Widget Buttons
-      const toggleClockBtn = document.createElement("button");
-      const isAnalog = widgetType === "analog";
-      const btnText = isAnalog
-        ? this.getTranslation("convert to digital")
-        : this.getTranslation("convert to analog");
-      toggleClockBtn.innerHTML = `<i data-lucide="${isAnalog ? "clock-4" : "clock"}" width="14" height="14" stroke-width="1.5"></i> ${btnText}`;
-      toggleClockBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        actions.onRenameGroup(group.id, isAnalog ? "ساعة رقمية" : "ساعة");
-        dropdown.classList.remove("show");
-      });
-      dropdown.appendChild(toggleClockBtn);
-      dropdown.appendChild(delBtn);
-    } else {
-      // Normal Group Buttons
-      dropdown.appendChild(renameBtn);
-      dropdown.appendChild(delBtn);
-    }
-
-    wrap.appendChild(triggerBtn);
-    wrap.appendChild(dropdown);
-
-    triggerBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      document.querySelectorAll(".group-dropdown.show").forEach((d) => {
-        if (d !== dropdown) d.classList.remove("show");
-      });
-      dropdown.classList.toggle("show");
-    });
-
-    return wrap;
-  }
-
+  /**
+   * Creates a site list item.
+   * @param {Object} site - The site object.
+   * @param {string} groupId - The group ID.
+   * @param {Object} actions - Actions for site management.
+   * @returns {HTMLElement} The site element.
+   * @private
+   */
   _createSiteElement(site, groupId, actions) {
     const siteEl = document.createElement("a");
     siteEl.className = "site-item";
@@ -778,18 +721,15 @@ class UIManager {
       contentWrap.appendChild(descEl);
     }
 
-    // Site action buttons (edit + delete)
     const actionsWrap = document.createElement("div");
     actionsWrap.className = "site-actions";
 
-    const editSiteBtn = document.createElement("button");
+    const editSiteBtn = this._createLucideIcon("pencil", { width: 13, height: 13 });
     editSiteBtn.className = "site-action-btn edit-site-btn";
     editSiteBtn.setAttribute(
       "aria-label",
       this.getTranslation("edit_site_aria") || "تعديل",
     );
-    editSiteBtn.innerHTML =
-      '<i data-lucide="pencil" width="13" height="13" stroke-width="2" aria-hidden="true"></i>';
     editSiteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       e.preventDefault();
@@ -798,14 +738,12 @@ class UIManager {
       }
     });
 
-    const delSiteBtn = document.createElement("button");
+    const delSiteBtn = this._createLucideIcon("trash-2", { width: 13, height: 13 });
     delSiteBtn.className = "site-action-btn delete-site-btn";
     delSiteBtn.setAttribute(
       "aria-label",
       `${this.getTranslation("delete_site_aria")} ${site.name}`,
     );
-    delSiteBtn.innerHTML =
-      '<i data-lucide="trash-2" width="13" height="13" stroke-width="2" aria-hidden="true"></i>';
     delSiteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       e.preventDefault();
@@ -822,12 +760,11 @@ class UIManager {
     return siteEl;
   }
 
-  closeDropdowns() {
-    document
-      .querySelectorAll(".group-dropdown.show")
-      .forEach((d) => d.classList.remove("show"));
-  }
-
+  /**
+   * Toggles modal visibility.
+   * @param {string} modalKey - Key of the modal to toggle.
+   * @param {boolean} isVisible - Visibility state.
+   */
   toggleModal(modalKey, isVisible) {
     const modal = this.elements.modals[modalKey];
     if (modal) {
@@ -835,6 +772,12 @@ class UIManager {
     }
   }
 
+  /**
+   * Renders search suggestions.
+   * @param {Array} suggestions - List of suggestions.
+   * @param {number} selectedIndex - Currently selected index.
+   * @param {Function} performAction - Action to perform on selection.
+   */
   renderSearchSuggestions(suggestions, selectedIndex, performAction) {
     const { searchBarWrapper } = this.elements.containers;
     const suggestionsBox = document.getElementById("searchSuggestions");
@@ -845,11 +788,11 @@ class UIManager {
         const query = document.getElementById("searchInput").value.trim();
         if (query) {
           suggestionsBox.innerHTML = `
-                <div style="padding: 16px; text-align: center; color: var(--text-color); opacity: 0.6; font-size: 13px;">
-                   <i data-lucide="search-x" width="24" height="24" style="margin-bottom: 8px; display: inline-block;"></i><br/>
-                   ${this.getTranslation("no_search_results") || "لم يتم العثور على نتائج"}
-                </div>
-             `;
+            <div class="suggestion-no-results">
+              <i data-lucide="search-x" width="24" height="24"></i><br/>
+              ${this.getTranslation("no_search_results") || "\u0644\u0645 \u064a\u062a\u0645 \u0627\u0644\u0639\u062b\u0648\u0631 \u0639\u0644\u0649 \u0646\u062a\u0627\u0626\u062c"}
+            </div>
+          `;
           suggestionsBox.classList.remove("hidden");
           if (typeof lucide !== "undefined") lucide.createIcons();
         } else {
@@ -859,39 +802,34 @@ class UIManager {
       return;
     }
 
+    const query = document.getElementById("searchInput").value.trim();
+
     suggestions.forEach((sug, index) => {
       const div = document.createElement("div");
-      div.className =
-        "suggestion-item" + (index === selectedIndex ? " selected" : "");
+      div.className = "suggestion-item" + (index === selectedIndex ? " selected" : "");
 
-      let icon = "search";
-      if (sug.type === "history" || sug.type === "search_history")
-        icon = "history";
-      if (sug.type === "site") icon = "globe";
-      if (sug.type === "exact_site") icon = "star"; // Exact match highlight
+      // Determine icon based on suggestion type
+      const iconMap = { history: "history", search_history: "history", site: "globe", exact_site: "star" };
+      const icon = iconMap[sug.type] || "search";
 
+      // Build URL sub-text
       let subText = "";
       if (sug.url && sug.url !== "search_action") {
-        subText = `<span class="suggestion-url" style="font-size: 11px; opacity: 0.45; margin-inline-start: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0;">${sug.url}</span>`;
+        subText = `<span class="suggestion-item-url">${sug.url}</span>`;
       }
 
-      // Highlight match
-      const query = document.getElementById("searchInput").value.trim();
+      // Highlight matching text
       let highlightedText = sug.text;
       if (query && sug.type !== "search") {
         const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         const regex = new RegExp(`(${escapedQuery})`, "gi");
-        highlightedText = sug.text.replace(
-          regex,
-          '<span style="color: var(--primary-color); font-weight: bold;">$1</span>',
-        );
+        highlightedText = sug.text.replace(regex, '<span class="suggestion-highlight">$1</span>');
       }
 
-      div.innerHTML = `<div style="display: flex; align-items: center; width: 100%; overflow: hidden;"><i data-lucide="${icon}" width="14" height="14" style="flex-shrink: 0; opacity: 0.6;"></i><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0; margin-inline-start: 12px; font-weight: 500;">${highlightedText}</span>${subText}</div>`;
+      div.innerHTML = `<div class="suggestion-item-inner"><i data-lucide="${icon}" width="14" height="14" class="suggestion-item-icon"></i><span class="suggestion-item-text">${highlightedText}</span>${subText}</div>`;
       div.addEventListener("click", () => performAction(sug));
       div.addEventListener("mouseenter", () => {
-        const items = suggestionsBox.querySelectorAll(".suggestion-item");
-        items.forEach((el) => el.classList.remove("selected"));
+        suggestionsBox.querySelectorAll(".suggestion-item").forEach((el) => el.classList.remove("selected"));
         div.classList.add("selected");
       });
       suggestionsBox.appendChild(div);
@@ -899,8 +837,6 @@ class UIManager {
 
     if (typeof lucide !== "undefined") lucide.createIcons();
     suggestionsBox.classList.remove("hidden");
-
-    // Initial scroll sync
     this.updateSearchSelection(selectedIndex);
   }
 
