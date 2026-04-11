@@ -10,7 +10,7 @@ const UI_TEMPLATES = [
   {
     id: "tem-1110",
     type: "video",
-    url: "backgrounds/1110.mp4",
+    url: "backgrounds/1110.webm",
     color: "#4A90E2",
     opacity: 0.15,
     theme: "dark",
@@ -18,7 +18,7 @@ const UI_TEMPLATES = [
   {
     id: "tem-1111",
     type: "video",
-    url: "backgrounds/1111.mp4",
+    url: "backgrounds/1111.webm",
     color: "#FF2E32",
     opacity: 0.1,
     theme: "dark",
@@ -26,7 +26,7 @@ const UI_TEMPLATES = [
   {
     id: "tem-1112",
     type: "video",
-    url: "backgrounds/1112.mp4",
+    url: "backgrounds/1112.webm",
     color: "#F58E9F",
     opacity: 0.15,
     theme: "light",
@@ -34,7 +34,7 @@ const UI_TEMPLATES = [
   {
     id: "tem-1113",
     type: "video",
-    url: "backgrounds/1113.mp4",
+    url: "backgrounds/1113.webm",
     color: "#D48A68",
     opacity: 0.1,
     theme: "dark",
@@ -42,7 +42,7 @@ const UI_TEMPLATES = [
   {
     id: "tem-1114",
     type: "video",
-    url: "backgrounds/1114.mp4",
+    url: "backgrounds/1114.webm",
     color: "#7AA439",
     opacity: 0.15,
     theme: "dark",
@@ -66,7 +66,7 @@ const UI_TEMPLATES = [
   {
     id: "tem-1117",
     type: "video",
-    url: "backgrounds/1117.mp4",
+    url: "backgrounds/1117.webm",
     color: "#FB8500",
     opacity: 0.2,
     theme: "dark",
@@ -74,7 +74,7 @@ const UI_TEMPLATES = [
   {
     id: "tem-1118",
     type: "video",
-    url: "backgrounds/1118.mp4",
+    url: "backgrounds/1118.webm",
     color: "#342F37",
     opacity: 0.15,
     theme: "dark",
@@ -82,7 +82,7 @@ const UI_TEMPLATES = [
   {
     id: "tem-11011",
     type: "video",
-    url: "backgrounds/11011.mp4",
+    url: "backgrounds/11011.webm",
     color: "#9B5DE5",
     opacity: 0.1,
     theme: "dark",
