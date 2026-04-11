@@ -96,6 +96,23 @@ class AppController {
     this.ui.renderPagesTabs(state.pages, state.activePageId, pageActions);
     this.ui.renderBoard(activePage.groups, proxyActions);
     this._initDragAndDrop();
+    
+    // Ensure dragging state matches Focus Mode if it was already active
+    if (document.body.classList.contains("focus-mode")) {
+      this.toggleDragging(false);
+    }
+  }
+
+  /**
+   * Enables or disables all SortableJS instances.
+   * @param {boolean} enabled 
+   */
+  toggleDragging(enabled) {
+    if (this.sortableInstances) {
+      this.sortableInstances.forEach(inst => {
+        inst.option("disabled", !enabled);
+      });
+    }
   }
 
   _onStateChange(renderImmediate = false) {

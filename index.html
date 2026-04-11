@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="css/widgets.css" />
     <link rel="stylesheet" href="css/modals.css" />
     <link rel="stylesheet" href="css/customize.css" />
+    <link rel="stylesheet" href="css/focus-mode.css" />
 
   </head>
   <body class="light-theme">
@@ -63,6 +64,19 @@
             aria-label="Controls"
             data-i18n-aria="aria_controls"
           >
+            <button
+              id="focusModeBtn"
+              class="header-btn"
+              aria-label="Toggle Focus Mode"
+            >
+              <i
+                data-lucide="eye-off"
+                width="18"
+                height="18"
+                aria-hidden="true"
+              ></i>
+              <span data-i18n="focus_mode">وضع التركيز</span>
+            </button>
             <button
               id="templatesBtn"
               class="header-btn"
@@ -799,6 +813,7 @@
     <script src="js/lib/utils.js"></script>
     <script src="js/UIManager.js"></script>
     <script src="js/AppController.js"></script>
+    <script src="js/FocusMode.js"></script>
     <script src="js/main.js"></script>
   </body>
 </html>

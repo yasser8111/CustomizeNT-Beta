@@ -158,7 +158,10 @@ class UIManager {
     root.style.setProperty("--card-scale", cardScale);
     root.style.setProperty("--search-scale", searchScale);
     this.elements.board.style.zoom = cardScale;
-    document.body.className = `${settings.themeMode}-theme`;
+
+    // Fix: Use classList instead of overwriting className to preserve Focus Mode
+    document.body.classList.remove("light-theme", "dark-theme");
+    document.body.classList.add(`${settings.themeMode}-theme`);
     if (settings.simpleMode) {
       document.body.classList.add("simple-mode");
     } else {

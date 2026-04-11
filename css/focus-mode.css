@@ -1,0 +1,75 @@
+/* --------------------------------------------------------------------------
+   FOCUS MODE STYLES
+   -------------------------------------------------------------------------- */
+
+/* Focus Mode State - Body Class */
+body.focus-mode {
+  transition: background-color 0.5s ease;
+}
+
+/* Hide all editable and UI control elements */
+body.focus-mode .header-left .add-page-btn,
+body.focus-mode .header-right .control-group button:not(#focusModeBtn),
+body.focus-mode .group-header-actions,
+body.focus-mode .site-actions,
+body.focus-mode .add-site-btn,
+body.focus-mode .add-group-placeholder,
+body.focus-mode .page-tab-actions,
+body.focus-mode .widget-actions {
+  display: none !important;
+}
+
+/* Global interaction restriction */
+body.focus-mode * {
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+/* Re-enable only for links, the toggle button, search bar, and page tabs */
+body.focus-mode a,
+body.focus-mode #focusModeBtn,
+body.focus-mode #focusModeBtn *,
+body.focus-mode .search-bar-wrapper,
+body.focus-mode .search-bar-wrapper *,
+body.focus-mode .page-tab {
+  pointer-events: auto !important;
+}
+
+/* Stabilizer for page tabs (prevents shrinking) */
+body.focus-mode .page-tab {
+  padding-inline: 20px !important;
+  transition: padding 0.3s ease;
+}
+
+/* Ensure no hover effects cause movement in focus mode */
+body.focus-mode .page-tab:hover,
+body.focus-mode .site-item:hover {
+  transform: none !important;
+}
+
+/* Visual polish for focus mode */
+body.focus-mode .board {
+  transition: opacity 0.5s ease;
+}
+
+body.focus-mode .site-item {
+  transition: box-shadow 0.3s ease;
+  user-drag: none;
+  -webkit-user-drag: none;
+}
+
+/* Focused button styling */
+#focusModeBtn.active {
+  background-color: var(--primary-color);
+  color: #fff;
+  opacity: 1;
+  box-shadow: 0 0 15px rgba(var(--primary-color-rgb), 0.4);
+}
+
+#focusModeBtn i {
+  transition: transform 0.3s ease;
+}
+
+#focusModeBtn.active i {
+  transform: rotate(180deg);
+}

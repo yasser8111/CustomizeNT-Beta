@@ -102,7 +102,9 @@
     "tabs_collected": "✓ تم جمع {count} تبويب",
     "collected_tabs": "تبويبات مجمّعة",
     "text_widget_title": "عنوان",
-    "text_widget_body": "اكتب هنا..."
+    "text_widget_body": "اكتب هنا...",
+    "focus_mode": "وضع التركيز",
+    "exit_focus_mode": "إيقاف وضع التركيز"
   },
   "en": {
     "page_title": "ControlTap | Custom New Tab",
@@ -207,6 +209,8 @@
     "tabs_collected": "✓ Collected {count} tabs",
     "collected_tabs": "Collected Tabs",
     "text_widget_title": "Title",
-    "text_widget_body": "Type here..."
+    "text_widget_body": "Type here...",
+    "focus_mode": "Focus Mode",
+    "exit_focus_mode": "Exit Focus Mode"
   }
 }
