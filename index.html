@@ -141,19 +141,22 @@
       <div class="modal">
         <h2 id="modalTitle" data-i18n="add_site_title">إضافة موقع جديد</h2>
         <input
-          type="text"
-          id="siteNameInput"
-          placeholder="اسم الموقع (مثل: Google)"
-          data-i18n-placeholder="site_name_placeholder"
-          dir="auto"
-        />
-        <input
           type="url"
           id="siteUrlInput"
           placeholder="الرابط (مثل: https://google.com)"
           data-i18n-placeholder="site_url_placeholder"
           dir="auto"
         />
+        <div class="site-name-input-wrap">
+          <input
+            type="text"
+            id="siteNameInput"
+            placeholder="اسم الموقع (مثل: Google)"
+            data-i18n-placeholder="site_name_placeholder"
+            dir="auto"
+          />
+          <span id="siteNameLoader" class="site-name-loader hidden"></span>
+        </div>
         <input
           type="text"
           id="siteDescInput"
@@ -162,6 +165,7 @@
           dir="auto"
         />
         <input type="hidden" id="currentGroupId" />
+        <input type="hidden" id="editSiteId" />
         <div class="modal-actions">
           <button id="cancelSiteBtn" class="btn btn-cancel" data-i18n="cancel">
             إلغاء

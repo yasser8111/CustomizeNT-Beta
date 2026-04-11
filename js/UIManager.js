@@ -31,7 +31,9 @@ class UIManager {
         simpleMode: document.getElementById("simpleModeInput"),
         openInNewTab: document.getElementById("openInNewTabInput"),
         showSearchBar: document.getElementById("showSearchBarInput"),
-        enableHistorySearch: document.getElementById("enableHistorySearchInput"),
+        enableHistorySearch: document.getElementById(
+          "enableHistorySearchInput",
+        ),
         language: document.getElementById("languageInput"),
         hideScrollbar: document.getElementById("hideScrollbarInput"),
       },
@@ -60,9 +62,9 @@ class UIManager {
     this.applyTranslations(lang);
 
     root.style.setProperty("--primary-color", settings.primaryColor);
-    
+
     // Convert hex to rgb for transparency usage
-    const hex = settings.primaryColor.replace('#', '');
+    const hex = settings.primaryColor.replace("#", "");
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);
     const b = parseInt(hex.substring(4, 6), 16);
@@ -333,11 +335,11 @@ class UIManager {
           ? this.getTranslation("theme_dark")
           : this.getTranslation("theme_light");
 
-      const deleteBtnStr = template.isCustom 
-        ? `<button class="delete-template-btn" data-id="${template.id}" title="${this.getTranslation('delete_template') || 'حذف القالب'}">
+      const deleteBtnStr = template.isCustom
+        ? `<button class="delete-template-btn" data-id="${template.id}" title="${this.getTranslation("delete_template") || "حذف القالب"}">
              <i data-lucide="trash-2" width="16" height="16"></i>
            </button>`
-        : '';
+        : "";
 
       item.innerHTML = `
                 <div class="template-preview" style="background: ${template.color};">
@@ -354,12 +356,17 @@ class UIManager {
             `;
 
       if (template.isCustom) {
-        const delBtn = item.querySelector('.delete-template-btn');
+        const delBtn = item.querySelector(".delete-template-btn");
         if (delBtn) {
-          delBtn.addEventListener('click', (e) => {
+          delBtn.addEventListener("click", (e) => {
             e.stopPropagation();
-            if (confirm(this.getTranslation('delete_template_confirm') || 'هل أنت متأكد من حذف هذا القالب؟')) {
-               if (window.App) window.App.deleteCustomTemplate(template.id);
+            if (
+              confirm(
+                this.getTranslation("delete_template_confirm") ||
+                  "هل أنت متأكد من حذف هذا القالب؟",
+              )
+            ) {
+              if (window.App) window.App.deleteCustomTemplate(template.id);
             }
           });
         }
@@ -528,11 +535,11 @@ class UIManager {
         `;
         placeholder.addEventListener("click", () => actions.onAddGroup(i));
         colEl.appendChild(placeholder);
-        
-        // Performance: Don't call createIcons on mousemove! 
+
+        // Performance: Don't call createIcons on mousemove!
         // We can use a pre-rendered SVG or handle it once.
         if (typeof lucide !== "undefined") {
-           lucide.createIcons({ nameAttr: 'data-lucide', root: placeholder });
+          lucide.createIcons({ nameAttr: "data-lucide", root: placeholder });
         }
 
         requestAnimationFrame(() => placeholder?.classList.add("visible"));
@@ -591,17 +598,56 @@ class UIManager {
         titleEl.contentEditable = true;
         titleEl.focus();
         document.execCommand("selectAll", false, null);
+        groupEl.classList.add("is-renaming");
       });
       titleEl.addEventListener("blur", (e) => {
         titleEl.contentEditable = false;
+        groupEl.classList.remove("is-renaming");
         const defaultTitle =
           this.getTranslation("new_group_placeholder") || "New Group";
         const newTitle = e.target.textContent.trim() || defaultTitle;
         actions.onRenameGroup(group.id, newTitle);
       });
 
+      titleEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          titleEl.blur();
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          titleEl.textContent = group.title;
+          titleEl.blur();
+        }
+      });
+
       headerEl.appendChild(titleEl);
-      headerEl.appendChild(this._createGroupSettingsDropdown(group, actions));
+
+      const headerActions = document.createElement("div");
+      headerActions.className = "group-header-actions";
+
+      const addBtn = document.createElement("button");
+      addBtn.className = "group-action-btn add-site-action";
+      addBtn.innerHTML = '<i data-lucide="plus" width="16" height="16"></i>';
+      addBtn.title = this.getTranslation("add_site");
+      addBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        actions.onOpenAddSiteModal(group.id);
+      });
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "group-action-btn delete-group-action";
+      delBtn.innerHTML = '<i data-lucide="trash-2" width="16" height="16"></i>';
+      delBtn.title = this.getTranslation("delete_group_btn");
+      delBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (confirm(this.getTranslation("delete_group_confirm"))) {
+          actions.onDeleteGroup(group.id);
+        }
+      });
+
+      headerActions.appendChild(addBtn);
+      headerActions.appendChild(delBtn);
+      headerEl.appendChild(headerActions);
       groupEl.appendChild(headerEl);
 
       const listEl = document.createElement("div");
@@ -612,20 +658,7 @@ class UIManager {
         listEl.appendChild(this._createSiteElement(site, group.id, actions));
       });
 
-      const addSiteBtn = document.createElement("button");
-      addSiteBtn.className = "add-site-btn";
-      addSiteBtn.innerHTML = `
-              <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-                  <i data-lucide="square-plus" width="14" height="14" stroke-width="2"></i>
-                  <span data-i18n="add_site">${this.getTranslation("add_site")}</span>
-              </div>
-          `;
-      addSiteBtn.addEventListener("click", () =>
-        actions.onOpenAddSiteModal(group.id),
-      );
-
       groupEl.appendChild(listEl);
-      groupEl.appendChild(addSiteBtn);
     }
 
     return groupEl;
@@ -649,7 +682,7 @@ class UIManager {
     renameBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       dropdown.classList.remove("show");
-      
+
       // Trigger the title editing directly
       const groupCard = dropdown.closest(".group-card");
       const titleEl = groupCard.querySelector(".group-title");
@@ -674,7 +707,9 @@ class UIManager {
       // Clock Widget Buttons
       const toggleClockBtn = document.createElement("button");
       const isAnalog = widgetType === "analog";
-      const btnText = isAnalog ? this.getTranslation("convert to digital") : this.getTranslation("convert to analog");
+      const btnText = isAnalog
+        ? this.getTranslation("convert to digital")
+        : this.getTranslation("convert to analog");
       toggleClockBtn.innerHTML = `<i data-lucide="${isAnalog ? "clock-4" : "clock"}" width="14" height="14" stroke-width="1.5"></i> ${btnText}`;
       toggleClockBtn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -743,23 +778,46 @@ class UIManager {
       contentWrap.appendChild(descEl);
     }
 
+    // Site action buttons (edit + delete)
+    const actionsWrap = document.createElement("div");
+    actionsWrap.className = "site-actions";
+
+    const editSiteBtn = document.createElement("button");
+    editSiteBtn.className = "site-action-btn edit-site-btn";
+    editSiteBtn.setAttribute(
+      "aria-label",
+      this.getTranslation("edit_site_aria") || "تعديل",
+    );
+    editSiteBtn.innerHTML =
+      '<i data-lucide="pencil" width="13" height="13" stroke-width="2" aria-hidden="true"></i>';
+    editSiteBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (actions.onEditSite) {
+        actions.onEditSite(groupId, site);
+      }
+    });
+
     const delSiteBtn = document.createElement("button");
-    delSiteBtn.className = "delete-site-btn";
+    delSiteBtn.className = "site-action-btn delete-site-btn";
     delSiteBtn.setAttribute(
       "aria-label",
       `${this.getTranslation("delete_site_aria")} ${site.name}`,
     );
     delSiteBtn.innerHTML =
-      '<i data-lucide="x" width="14" height="14" stroke-width="2" aria-hidden="true"></i>';
+      '<i data-lucide="trash-2" width="13" height="13" stroke-width="2" aria-hidden="true"></i>';
     delSiteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       e.preventDefault();
       actions.onDeleteSite(groupId, site.id);
     });
 
+    actionsWrap.appendChild(editSiteBtn);
+    actionsWrap.appendChild(delSiteBtn);
+
     siteEl.appendChild(iconEl);
     siteEl.appendChild(contentWrap);
-    siteEl.appendChild(delSiteBtn);
+    siteEl.appendChild(actionsWrap);
 
     return siteEl;
   }
@@ -780,63 +838,68 @@ class UIManager {
   renderSearchSuggestions(suggestions, selectedIndex, performAction) {
     const { searchBarWrapper } = this.elements.containers;
     const suggestionsBox = document.getElementById("searchSuggestions");
-    
+
     suggestionsBox.innerHTML = "";
     if (!suggestions || suggestions.length === 0) {
       if (searchBarWrapper) {
-          const query = document.getElementById("searchInput").value.trim();
-          if (query) {
-             suggestionsBox.innerHTML = `
+        const query = document.getElementById("searchInput").value.trim();
+        if (query) {
+          suggestionsBox.innerHTML = `
                 <div style="padding: 16px; text-align: center; color: var(--text-color); opacity: 0.6; font-size: 13px;">
                    <i data-lucide="search-x" width="24" height="24" style="margin-bottom: 8px; display: inline-block;"></i><br/>
                    ${this.getTranslation("no_search_results") || "لم يتم العثور على نتائج"}
                 </div>
              `;
-             suggestionsBox.classList.remove("hidden");
-             if (typeof lucide !== "undefined") lucide.createIcons();
-          } else {
-             suggestionsBox.classList.add("hidden");
-          }
+          suggestionsBox.classList.remove("hidden");
+          if (typeof lucide !== "undefined") lucide.createIcons();
+        } else {
+          suggestionsBox.classList.add("hidden");
+        }
       }
       return;
     }
 
     suggestions.forEach((sug, index) => {
       const div = document.createElement("div");
-      div.className = "suggestion-item" + (index === selectedIndex ? " selected" : "");
-      
+      div.className =
+        "suggestion-item" + (index === selectedIndex ? " selected" : "");
+
       let icon = "search";
-      if (sug.type === "history" || sug.type === "search_history") icon = "history";
+      if (sug.type === "history" || sug.type === "search_history")
+        icon = "history";
       if (sug.type === "site") icon = "globe";
       if (sug.type === "exact_site") icon = "star"; // Exact match highlight
 
       let subText = "";
       if (sug.url && sug.url !== "search_action") {
-         subText = `<span class="suggestion-url" style="font-size: 11px; opacity: 0.45; margin-inline-start: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0;">${sug.url}</span>`;
+        subText = `<span class="suggestion-url" style="font-size: 11px; opacity: 0.45; margin-inline-start: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0;">${sug.url}</span>`;
       }
 
       // Highlight match
       const query = document.getElementById("searchInput").value.trim();
       let highlightedText = sug.text;
       if (query && sug.type !== "search") {
-         const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-         const regex = new RegExp(`(${escapedQuery})`, 'gi');
-         highlightedText = sug.text.replace(regex, '<span style="color: var(--primary-color); font-weight: bold;">$1</span>');
+        const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const regex = new RegExp(`(${escapedQuery})`, "gi");
+        highlightedText = sug.text.replace(
+          regex,
+          '<span style="color: var(--primary-color); font-weight: bold;">$1</span>',
+        );
       }
 
       div.innerHTML = `<div style="display: flex; align-items: center; width: 100%; overflow: hidden;"><i data-lucide="${icon}" width="14" height="14" style="flex-shrink: 0; opacity: 0.6;"></i><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0; margin-inline-start: 12px; font-weight: 500;">${highlightedText}</span>${subText}</div>`;
       div.addEventListener("click", () => performAction(sug));
       div.addEventListener("mouseenter", () => {
-         const items = suggestionsBox.querySelectorAll(".suggestion-item");
-         items.forEach(el => el.classList.remove("selected"));
-         div.classList.add("selected");
+        const items = suggestionsBox.querySelectorAll(".suggestion-item");
+        items.forEach((el) => el.classList.remove("selected"));
+        div.classList.add("selected");
       });
       suggestionsBox.appendChild(div);
     });
-    
+
     if (typeof lucide !== "undefined") lucide.createIcons();
     suggestionsBox.classList.remove("hidden");
-    
+
     // Initial scroll sync
     this.updateSearchSelection(selectedIndex);
   }
@@ -853,24 +916,24 @@ class UIManager {
     if (index >= 0 && items[index]) {
       const container = suggestionsBox;
       const item = items[index];
-      
+
       const itemRect = item.getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
 
       if (index === 0) {
         // Absolutely at the top
-        container.scrollTo({ top: 0, behavior: 'smooth' });
+        container.scrollTo({ top: 0, behavior: "smooth" });
       } else if (index === items.length - 1) {
         // Absolutely at the bottom
-        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
       } else if (itemRect.top < containerRect.top) {
         // Scrolling UP: it's clipped at the top. Scroll up by the exact hidden distance.
         const hiddenAmount = containerRect.top - itemRect.top;
-        container.scrollBy({ top: -(hiddenAmount + 4), behavior: 'smooth' }); // small 4px top gap
+        container.scrollBy({ top: -(hiddenAmount + 4), behavior: "smooth" }); // small 4px top gap
       } else if (itemRect.bottom > containerRect.bottom) {
         // Scrolling DOWN: it's clipped at the bottom. Scroll down by the exact hidden distance.
         const hiddenAmount = itemRect.bottom - containerRect.bottom;
-        container.scrollBy({ top: hiddenAmount + 12, behavior: 'smooth' }); // 12px bottom space
+        container.scrollBy({ top: hiddenAmount + 12, behavior: "smooth" }); // 12px bottom space
       }
     }
   }

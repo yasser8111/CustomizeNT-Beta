@@ -29,12 +29,16 @@
   width: 100%;
   max-width: 500px;
   margin: auto;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   color: var(--group-title-color);
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
-  transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.3s ease;
+  transition:
+    transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
+    opacity 0.3s ease;
 }
 
 .modal h2 {
@@ -90,6 +94,38 @@
   font-size: var(--font-md);
 }
 
+/* Site Name Input Wrapper (for auto-fetch loader) */
+.site-name-input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.site-name-input-wrap input {
+  width: 100%;
+  padding-inline-end: 36px;
+}
+
+.site-name-loader {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 14px;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+.site-name-loader.hidden {
+  display: none;
+}
+
+@keyframes spin {
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
 /* Settings Modal Specifics */
 .settings-modal {
   max-width: 540px;
@@ -99,7 +135,10 @@
 .setting-group {
   margin-bottom: 24px;
   text-align: start;
-  background: rgba(var(--card-bg-rgb), 0.05); /* Subtler background for setting blocks */
+  background: rgba(
+    var(--card-bg-rgb),
+    0.05
+  ); /* Subtler background for setting blocks */
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -178,7 +217,7 @@
   height: 24px;
 }
 
-.switch input { 
+.switch input {
   opacity: 0;
   width: 0;
   height: 0;
@@ -193,7 +232,7 @@
   bottom: 0;
   background-color: rgba(var(--card-bg-rgb), 0.2);
   border: 1px solid var(--border-color);
-  transition: .3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .slider:before {
@@ -204,7 +243,7 @@
   left: 3px;
   bottom: 2px;
   background-color: var(--text-color);
-  transition: .3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 input:checked + .slider {

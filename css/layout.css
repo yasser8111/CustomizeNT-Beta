@@ -117,7 +117,9 @@
 
 /* Adjust layout when search bar is visible */
 .search-bar-wrapper:not(.hidden) + .board {
-  padding-top: calc((80px + (80px * var(--search-scale, 1))) / var(--card-scale, 1));
+  padding-top: calc(
+    (80px + (80px * var(--search-scale, 1))) / var(--card-scale, 1)
+  );
 }
 
 .board-column {

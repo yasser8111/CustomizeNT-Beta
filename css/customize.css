@@ -341,13 +341,15 @@
   justify-content: center;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.3s ease, transform 0.2s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.2s ease;
   backdrop-filter: blur(4px);
 }
 
 .delete-template-btn:hover {
   transform: scale(1.1);
-  background: #FF2E32;
+  background: #ff2e32;
 }
 
 .template-item:hover .delete-template-btn {

@@ -28,7 +28,7 @@
   font-weight: 700;
   letter-spacing: -1px;
   line-height: 1;
-  font-family: 'JetBrains Mono', 'Segoe UI Mono', monospace;
+  font-family: "JetBrains Mono", "Segoe UI Mono", monospace;
   color: var(--text-color);
   position: relative;
   z-index: 1;
@@ -152,7 +152,7 @@
 }
 
 .text-widget-content.editing {
-  border-color: rgba(var(--primary-color-rgb), 0.25);
+  border-color: rgba(var(--primary-color-rgb), .5);
 }
 
 .text-widget-heading {
@@ -181,7 +181,7 @@
   background: transparent;
   border: none;
   color: var(--text-color);
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 14px;
   line-height: 1.7;
   resize: none;

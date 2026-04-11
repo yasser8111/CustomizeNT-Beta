@@ -45,6 +45,7 @@ class AppController {
       onDeleteGroup: (groupId) => this._removeGroup(groupId),
       onOpenAddSiteModal: (groupId) => this._openSiteModal(groupId),
       onDeleteSite: (groupId, siteId) => this._removeSite(groupId, siteId),
+      onEditSite: (groupId, site) => this._openEditSiteModal(groupId, site),
       onSaveWidgetData: (groupId, data) => this._saveWidgetData(groupId, data),
     };
 
@@ -201,27 +202,96 @@ class AppController {
 
   _openSiteModal(groupId) {
     const { inputs } = this.ui.elements;
+    const editSiteId = document.getElementById("editSiteId");
     inputs.groupId.value = groupId;
     inputs.siteName.value = "";
     inputs.siteUrl.value = "";
     if (inputs.siteDesc) inputs.siteDesc.value = "";
+    if (editSiteId) editSiteId.value = "";
+
+    const modalTitle = document.getElementById("modalTitle");
+    if (modalTitle) {
+      modalTitle.textContent = this.ui.getTranslation("add_site_title");
+    }
+
     this.ui.toggleModal("site", true);
-    inputs.siteName.focus();
+    inputs.siteUrl.focus();
+  }
+
+  _openEditSiteModal(groupId, site) {
+    const { inputs } = this.ui.elements;
+    const editSiteId = document.getElementById("editSiteId");
+    inputs.groupId.value = groupId;
+    inputs.siteUrl.value = site.url || "";
+    inputs.siteName.value = site.name || "";
+    if (inputs.siteDesc) inputs.siteDesc.value = site.desc || "";
+    if (editSiteId) editSiteId.value = site.id;
+
+    const modalTitle = document.getElementById("modalTitle");
+    if (modalTitle) {
+      modalTitle.textContent = this.ui.getTranslation("edit_site_title") || "تعديل الموقع";
+    }
+
+    this.ui.toggleModal("site", true);
+    inputs.siteUrl.focus();
   }
 
   _saveSite() {
     const { inputs } = this.ui.elements;
-    const name = inputs.siteName.value.trim();
+    const editSiteId = document.getElementById("editSiteId");
+    let name = inputs.siteName.value.trim();
     let url = inputs.siteUrl.value.trim();
     const desc = inputs.siteDesc ? inputs.siteDesc.value.trim() : "";
 
-    if (!name || !url)
-      return alert(this.ui.getTranslation("site_name_url_required"));
+    if (!url)
+      return alert(this.ui.getTranslation("site_url_required"));
     if (!url.startsWith("http://") && !url.startsWith("https://"))
       url = `https://${url}`;
 
-    this._addSite(inputs.groupId.value, name, url, desc);
+    // Auto-fill name from domain if empty
+    if (!name) {
+      try {
+        const domain = new URL(url).hostname.replace("www.", "");
+        name = domain.charAt(0).toUpperCase() + domain.slice(1);
+      } catch {
+        name = url;
+      }
+    }
+
+    const isEditing = editSiteId && editSiteId.value;
+
+    if (isEditing) {
+      this._updateSite(inputs.groupId.value, editSiteId.value, name, url, desc);
+    } else {
+      this._addSite(inputs.groupId.value, name, url, desc);
+    }
     this.ui.toggleModal("site", false);
+  }
+
+  _updateSite(groupId, siteId, name, url, desc) {
+    const group = this._findGroup(groupId);
+    if (group) {
+      const site = group.sites.find(s => s.id === siteId);
+      if (site) {
+        site.name = name;
+        site.url = url;
+        site.desc = desc;
+        this._onStateChange(true);
+      }
+    }
+  }
+
+  _fetchSiteTitle(url) {
+    try {
+      const parsedUrl = new URL(url);
+      const hostname = parsedUrl.hostname.replace("www.", "");
+      // Clean domain name: e.g. "google.com" -> "Google"
+      const parts = hostname.split(".");
+      const name = parts[0];
+      return name.charAt(0).toUpperCase() + name.slice(1);
+    } catch {
+      return "";
+    }
   }
 
   _bindStaticEvents() {
@@ -583,6 +653,42 @@ class AppController {
     document
       .getElementById("cancelSiteBtn")
       .addEventListener("click", () => this.ui.toggleModal("site", false));
+
+     const siteModalInputs = [inputs.siteName, inputs.siteUrl, inputs.siteDesc];
+    siteModalInputs.forEach(input => {
+      if (input) {
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            this._saveSite();
+          }
+        });
+      }
+    });
+
+    // Auto-fetch site name from URL when user leaves the URL field
+    if (inputs.siteUrl) {
+      inputs.siteUrl.addEventListener("blur", () => {
+        const url = inputs.siteUrl.value.trim();
+        if (url && !inputs.siteName.value.trim()) {
+          let normalizedUrl = url;
+          if (!normalizedUrl.startsWith("http://") && !normalizedUrl.startsWith("https://"))
+            normalizedUrl = `https://${normalizedUrl}`;
+          
+          const loader = document.getElementById("siteNameLoader");
+          if (loader) loader.classList.remove("hidden");
+
+          // Brief delay for premium feel
+          setTimeout(() => {
+            const fetchedName = this._fetchSiteTitle(normalizedUrl);
+            if (fetchedName) {
+              inputs.siteName.value = fetchedName;
+            }
+            if (loader) loader.classList.add("hidden");
+          }, 400);
+        }
+      });
+    }
     const cancelTemplates = document.getElementById("cancelTemplatesBtn");
     if (cancelTemplates) {
       cancelTemplates.addEventListener("click", () =>
