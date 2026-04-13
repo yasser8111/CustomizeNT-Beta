@@ -699,6 +699,7 @@ class UIManager {
 
       const listEl = document.createElement("div");
       listEl.className = "site-list";
+      listEl.dataset.groupId = group.id;
       group.sites.forEach((site) => {
         listEl.appendChild(this._createSiteElement(site, group.id, actions));
       });
