@@ -847,12 +847,6 @@ class UIManager {
       const iconMap = { history: "history", search_history: "history", site: "globe", exact_site: "star" };
       const icon = iconMap[sug.type] || "search";
 
-      // Build URL sub-text
-      let subText = "";
-      if (sug.url && sug.url !== "search_action") {
-        subText = sug.url;
-      }
-
       // Highlight matching text
       let highlightedText = sug.text;
       if (query && sug.type !== "search") {
@@ -872,13 +866,6 @@ class UIManager {
       textEl.className = "suggestion-item-text";
       textEl.innerHTML = highlightedText;
       innerDiv.appendChild(textEl);
-
-      if (subText) {
-        const urlEl = document.createElement("span");
-        urlEl.className = "suggestion-item-url";
-        urlEl.textContent = subText;
-        innerDiv.appendChild(urlEl);
-      }
 
       div.appendChild(innerDiv);
       div.addEventListener("click", () => performAction(sug));

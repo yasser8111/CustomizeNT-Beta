@@ -103,7 +103,7 @@
   gap: var(--space-xl);
   padding: calc(110px / var(--card-scale, 1))
     calc(var(--space-3xl) / var(--card-scale, 1))
-    calc(150px / var(--card-scale, 1))
+    calc(40px / var(--card-scale, 1))
     calc(var(--space-3xl) / var(--card-scale, 1));
   margin: 0 auto;
   max-width: calc(2000px / var(--card-scale, 1));

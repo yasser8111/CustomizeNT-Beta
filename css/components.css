@@ -55,7 +55,6 @@
 .page-tab-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
   width: 0;
   overflow: hidden;
   opacity: 0;
@@ -177,7 +176,6 @@
   padding-inline-end: 50px;
 }
 
-
 .group-header-actions {
   position: absolute;
   inset-inline-end: 16px;
@@ -190,7 +188,6 @@
   pointer-events: none;
   z-index: 5;
 }
-
 
 .group-card:not(.is-renaming):hover .group-header-actions {
   opacity: 1;
@@ -238,7 +235,6 @@
   background: rgba(var(--primary-color-rgb), 0.1) !important;
 }
 
-
 /* Site List container */
 .site-list {
   padding: 12px;
@@ -257,20 +253,16 @@
   border: 1px solid transparent;
   padding: 10px 14px;
   border-radius: 10px;
-  transition:
-    background-color 0.3s,
-    border-color 0.2s,
-    box-shadow 0.2s,
-    color 0.2s;
+  transition: all 0.3s ease;
+  cursor: pointer;
   text-decoration: none;
   color: var(--text-color);
-  user-select: none; /* Prevents text selection cursor during drag */
+  user-select: none;
   -webkit-user-drag: element;
 }
 
 .site-item:hover {
   background: var(--site-hover-bg);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   color: var(--group-title-color);
 }
 
@@ -311,7 +303,6 @@
 .site-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
   width: 0;
   overflow: hidden;
   opacity: 0;
