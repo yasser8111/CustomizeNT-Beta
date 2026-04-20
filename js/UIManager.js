@@ -2,7 +2,7 @@
  * UIManager
  * Responsible for all DOM rendering and visual updates.
  * Receives state data and renders it. Emits user actions via callbacks.
- * 
+ *
  * @class UIManager
  */
 class UIManager {
@@ -27,6 +27,7 @@ class UIManager {
         primaryColor: document.getElementById("primaryColorInput"),
         cardOpacity: document.getElementById("cardOpacityInput"),
         bgFile: document.getElementById("bgFileInput"),
+        bgUrl: document.getElementById("bgUrlInput"),
         colCount: document.getElementById("colCountInput"),
         cardSize: document.getElementById("cardSizeInput"),
         searchSize: document.getElementById("searchSizeInput"),
@@ -38,6 +39,10 @@ class UIManager {
         ),
         language: document.getElementById("languageInput"),
         hideScrollbar: document.getElementById("hideScrollbarInput"),
+        hideDescription: document.getElementById("hideDescriptionInput"),
+        iconOnlyMode: document.getElementById("iconOnlyModeInput"),
+        siteDirection: document.getElementById("siteDirectionInput"),
+        hideBorders: document.getElementById("hideBordersInput"),
       },
       containers: {
         bgPresets: document.getElementById("bgPresetsContainer"),
@@ -107,7 +112,10 @@ class UIManager {
     });
 
     // Prefer direct SVG creation so event listeners survive
-    if (typeof lucide !== "undefined" && typeof lucide.createElement === "function") {
+    if (
+      typeof lucide !== "undefined" &&
+      typeof lucide.createElement === "function"
+    ) {
       // Convert kebab-case icon name to Lucide's PascalCase export name
       // e.g. "trash-2" → "Trash2", "plus-circle" → "PlusCircle"
       const pascalName = iconName
@@ -140,7 +148,14 @@ class UIManager {
     const root = document.documentElement;
     const lang = settings.language || "ar";
     root.setAttribute("lang", lang);
-    root.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+
+    // Direction: auto (based on lang), or forced rtl/ltr
+    const dirSetting = settings.siteDirection || "auto";
+    if (dirSetting === "auto") {
+      root.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+    } else {
+      root.setAttribute("dir", dirSetting);
+    }
     this.applyTranslations(lang);
 
     root.style.setProperty("--primary-color", settings.primaryColor);
@@ -172,6 +187,27 @@ class UIManager {
       document.body.classList.add("hide-scrollbar");
     } else {
       document.body.classList.remove("hide-scrollbar");
+    }
+
+    // Hide Description Mode
+    if (settings.hideDescription) {
+      document.body.classList.add("hide-description");
+    } else {
+      document.body.classList.remove("hide-description");
+    }
+
+    // Icon-Only Mode
+    if (settings.iconOnlyMode) {
+      document.body.classList.add("icon-only-mode");
+    } else {
+      document.body.classList.remove("icon-only-mode");
+    }
+
+    // Hide Borders Mode
+    if (settings.hideBorders) {
+      document.body.classList.add("hide-borders");
+    } else {
+      document.body.classList.remove("hide-borders");
     }
 
     if (settings.showSearchBar && this.elements.containers.searchBarWrapper) {
@@ -275,14 +311,15 @@ class UIManager {
 
   /**
    * Updates the live preview in the customization modal.
-   * @param {MediaStorage} mediaStorage 
+   * @param {MediaStorage} mediaStorage
    * @param {Object} [currentSettings] - Optional settings to preview instead of current state
    */
   async updateUserMediaPreview(mediaStorage, currentSettings) {
     const container = this.elements.containers.userMediaPreview;
     if (!container) return;
 
-    const settings = currentSettings || window.App?.stateManager?.getState()?.settings;
+    const settings =
+      currentSettings || window.App?.stateManager?.getState()?.settings;
     if (!settings) return;
 
     container.innerHTML = "";
@@ -305,13 +342,63 @@ class UIManager {
     container.appendChild(el);
   }
 
-  getFavicon(url) {
+  /**
+   * Returns an ordered list of favicon URLs from highest to lowest quality.
+   * @param {string} url - The site URL.
+   * @returns {string[]} Array of favicon URLs sorted by quality (highest first).
+   */
+  getFaviconSources(url) {
     try {
-      const domain = new URL(url).hostname;
-      return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+      const parsed = new URL(url);
+      const domain = parsed.hostname;
+      const origin = parsed.origin;
+      return [
+        `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+        `https://www.google.com/s2/favicons?domain=${domain}&sz=64`,
+        `https://icons.duckduckgo.com/ip3/${domain}.ico`,
+        `${origin}/favicon.ico`,
+        `https://www.google.com/s2/favicons?domain=${domain}&sz=32`,
+      ];
     } catch {
-      return `https://www.google.com/s2/favicons?domain=google.com&sz=64`;
+      return [`https://www.google.com/s2/favicons?domain=google.com&sz=64`];
     }
+  }
+
+  /**
+   * Returns the highest quality favicon URL for a site.
+   * For backward compatibility – returns just the first (best) source.
+   * @param {string} url - The site URL.
+   * @returns {string} Best favicon URL.
+   */
+  getFavicon(url) {
+    return this.getFaviconSources(url)[0];
+  }
+
+  /**
+   * Sets up progressive favicon loading on an img element.
+   * Tries the highest quality source first; on error, falls back to the next.
+   * @param {HTMLImageElement} imgEl - The image element.
+   * @param {string} siteUrl - The site URL.
+   */
+  _setupProgressiveFavicon(imgEl, siteUrl) {
+    const sources = this.getFaviconSources(siteUrl);
+    let currentIndex = 0;
+
+    imgEl.src = sources[currentIndex];
+
+    imgEl.onerror = () => {
+      currentIndex++;
+      if (currentIndex < sources.length) {
+        imgEl.src = sources[currentIndex];
+      } else {
+        // Final fallback: a 1x1 transparent pixel (avoids infinite loop)
+        imgEl.onerror = null;
+        imgEl.src =
+          'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="%23555"/><text x="16" y="22" font-size="18" fill="white" text-anchor="middle" font-family="sans-serif">' +
+          (imgEl.alt?.[0] || "?") +
+          "</text></svg>";
+      }
+    };
   }
 
   /**
@@ -338,12 +425,16 @@ class UIManager {
     // Create Template Item
     const createItem = document.createElement("div");
     createItem.className = "template-item add-template-card";
-    
-    const plusIcon = this._createLucideIcon("plus-circle", { width: 36, height: 36, style: 'color: var(--primary-color)' });
+
+    const plusIcon = this._createLucideIcon("plus-circle", {
+      width: 36,
+      height: 36,
+      style: "color: var(--primary-color)",
+    });
     const createLabel = document.createElement("span");
     createLabel.className = "template-create-title";
     createLabel.textContent = this.getTranslation("create_custom_template");
-    
+
     createItem.appendChild(plusIcon);
     createItem.appendChild(createLabel);
     createItem.addEventListener("click", () => {
@@ -357,7 +448,8 @@ class UIManager {
       const item = document.createElement("div");
       item.className = "template-item";
 
-      const templateName = this.getTranslation(template.id) !== template.id
+      const templateName =
+        this.getTranslation(template.id) !== template.id
           ? this.getTranslation(template.id)
           : template.name || template.id;
 
@@ -373,7 +465,9 @@ class UIManager {
       previewContainer.className = "template-preview";
       previewContainer.style.background = template.color;
 
-      const mediaEl = this._createMediaElement(renderUrl || "", isVideo, { autoplay: false });
+      const mediaEl = this._createMediaElement(renderUrl || "", isVideo, {
+        autoplay: false,
+      });
       mediaEl.style.width = "100%";
       mediaEl.style.height = "100%";
       mediaEl.style.objectFit = "cover";
@@ -383,7 +477,9 @@ class UIManager {
         const delBtn = document.createElement("button");
         delBtn.className = "delete-template-btn";
         delBtn.title = this.getTranslation("delete_template");
-        delBtn.appendChild(this._createLucideIcon("trash-2", { width: 16, height: 16 }));
+        delBtn.appendChild(
+          this._createLucideIcon("trash-2", { width: 16, height: 16 }),
+        );
         delBtn.addEventListener("click", (e) => {
           e.stopPropagation();
           if (confirm(this.getTranslation("delete_template_confirm"))) {
@@ -395,40 +491,47 @@ class UIManager {
 
       const overlay = document.createElement("div");
       overlay.className = "template-overlay";
-      
+
       const nameSpan = document.createElement("span");
       nameSpan.className = "template-name-minimal";
       nameSpan.textContent = templateName;
-      
+
       const badgeRow = document.createElement("div");
       badgeRow.className = "template-badges-row";
-      
+
       const typeBadge = document.createElement("span");
       typeBadge.className = "template-badge-minimal";
-      typeBadge.textContent = isVideo ? this.getTranslation("video_badge") : this.getTranslation("image_badge");
-      
+      typeBadge.textContent = isVideo
+        ? this.getTranslation("video_badge")
+        : this.getTranslation("image_badge");
+
       const themeBadge = document.createElement("span");
       themeBadge.className = "template-badge-minimal";
-      themeBadge.textContent = template.theme === "dark" ? this.getTranslation("theme_dark") : this.getTranslation("theme_light");
-      
+      themeBadge.textContent =
+        template.theme === "dark"
+          ? this.getTranslation("theme_dark")
+          : this.getTranslation("theme_light");
+
       badgeRow.appendChild(typeBadge);
       badgeRow.appendChild(themeBadge);
       overlay.appendChild(nameSpan);
       overlay.appendChild(badgeRow);
       previewContainer.appendChild(overlay);
-      
+
       item.appendChild(previewContainer);
       item.addEventListener("click", () => onSelectTemplate(template));
 
       if (isVideo) {
-        item.addEventListener("mouseenter", () => mediaEl.play().catch(() => {}));
+        item.addEventListener("mouseenter", () =>
+          mediaEl.play().catch(() => {}),
+        );
         item.addEventListener("mouseleave", () => mediaEl.pause());
       }
 
       grid.appendChild(item);
     });
 
-    if (typeof lucide !== 'undefined') {
+    if (typeof lucide !== "undefined") {
       lucide.createIcons({ root: grid });
     }
   }
@@ -673,7 +776,11 @@ class UIManager {
       const headerActions = document.createElement("div");
       headerActions.className = "group-header-actions";
 
-      const addBtn = this._createLucideIcon("plus", { width: 14, height: 14, strokeWidth: 1.5 });
+      const addBtn = this._createLucideIcon("plus", {
+        width: 14,
+        height: 14,
+        strokeWidth: 1.5,
+      });
       addBtn.setAttribute("class", "group-action-btn add-site-action");
       addBtn.title = this.getTranslation("add_site");
       addBtn.addEventListener("click", (e) => {
@@ -681,7 +788,11 @@ class UIManager {
         actions.onOpenAddSiteModal(group.id);
       });
 
-      const delBtn = this._createLucideIcon("trash-2", { width: 14, height: 14, strokeWidth: 1.5 });
+      const delBtn = this._createLucideIcon("trash-2", {
+        width: 14,
+        height: 14,
+        strokeWidth: 1.5,
+      });
       delBtn.setAttribute("class", "group-action-btn delete-group-action");
       delBtn.title = this.getTranslation("delete_group");
       delBtn.addEventListener("click", (e) => {
@@ -733,11 +844,11 @@ class UIManager {
 
     const iconEl = document.createElement("img");
     iconEl.className = "site-favicon";
-    iconEl.src = this.getFavicon(site.url);
     iconEl.alt = `${site.name} icon`;
     iconEl.width = 16;
     iconEl.height = 16;
     iconEl.loading = "lazy";
+    this._setupProgressiveFavicon(iconEl, site.url);
 
     const nameEl = document.createElement("div");
     nameEl.className = "site-name";
@@ -759,7 +870,11 @@ class UIManager {
     const actionsWrap = document.createElement("div");
     actionsWrap.className = "site-actions";
 
-    const editSiteBtn = this._createLucideIcon("pencil", { width: 12, height: 12, strokeWidth: 1.5 });
+    const editSiteBtn = this._createLucideIcon("pencil", {
+      width: 12,
+      height: 12,
+      strokeWidth: 1.5,
+    });
     editSiteBtn.setAttribute("class", "site-action-btn edit-site-btn");
     editSiteBtn.setAttribute(
       "aria-label",
@@ -773,7 +888,11 @@ class UIManager {
       }
     });
 
-    const delSiteBtn = this._createLucideIcon("trash-2", { width: 12, height: 12, strokeWidth: 1.5 });
+    const delSiteBtn = this._createLucideIcon("trash-2", {
+      width: 12,
+      height: 12,
+      strokeWidth: 1.5,
+    });
     delSiteBtn.setAttribute("class", "site-action-btn delete-site-btn");
     delSiteBtn.setAttribute(
       "aria-label",
@@ -841,10 +960,16 @@ class UIManager {
 
     suggestions.forEach((sug, index) => {
       const div = document.createElement("div");
-      div.className = "suggestion-item" + (index === selectedIndex ? " selected" : "");
+      div.className =
+        "suggestion-item" + (index === selectedIndex ? " selected" : "");
 
       // Determine icon based on suggestion type
-      const iconMap = { history: "history", search_history: "history", site: "globe", exact_site: "star" };
+      const iconMap = {
+        history: "history",
+        search_history: "history",
+        site: "globe",
+        exact_site: "star",
+      };
       const icon = iconMap[sug.type] || "search";
 
       // Highlight matching text
@@ -852,16 +977,23 @@ class UIManager {
       if (query && sug.type !== "search") {
         const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         const regex = new RegExp(`(${escapedQuery})`, "gi");
-        highlightedText = sug.text.replace(regex, '<span class="suggestion-highlight">$1</span>');
+        highlightedText = sug.text.replace(
+          regex,
+          '<span class="suggestion-highlight">$1</span>',
+        );
       }
 
-      const iconDiv = this._createLucideIcon(icon, { width: 14, height: 14, strokeWidth: 1.5 });
+      const iconDiv = this._createLucideIcon(icon, {
+        width: 14,
+        height: 14,
+        strokeWidth: 1.5,
+      });
       iconDiv.classList.add("suggestion-item-icon");
 
       const innerDiv = document.createElement("div");
       innerDiv.className = "suggestion-item-inner";
       innerDiv.appendChild(iconDiv);
-      
+
       const textEl = document.createElement("span");
       textEl.className = "suggestion-item-text";
       textEl.innerHTML = highlightedText;
@@ -870,7 +1002,9 @@ class UIManager {
       div.appendChild(innerDiv);
       div.addEventListener("click", () => performAction(sug));
       div.addEventListener("mouseenter", () => {
-        suggestionsBox.querySelectorAll(".suggestion-item").forEach((el) => el.classList.remove("selected"));
+        suggestionsBox
+          .querySelectorAll(".suggestion-item")
+          .forEach((el) => el.classList.remove("selected"));
         div.classList.add("selected");
       });
       suggestionsBox.appendChild(div);

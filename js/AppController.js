@@ -12,12 +12,15 @@ class AppController {
     this.sortableInstances = [];
     this.el = {}; // DOM cache
     this._cacheElements();
-    
+
     this._bindStaticEvents();
 
     // Performance: Debounce recursive rendering/saving
     this.debouncedRenderAll = window.utils.debounce(() => this.renderAll(), 50);
-    this.debouncedSaveState = window.utils.debounce(() => this.stateManager.save(), 500);
+    this.debouncedSaveState = window.utils.debounce(
+      () => this.stateManager.save(),
+      500,
+    );
   }
 
   /**
@@ -48,7 +51,7 @@ class AppController {
       cardSizeInput: document.getElementById("cardSizeInput"),
       searchSizeInput: document.getElementById("searchSizeInput"),
       searchInput: document.getElementById("searchInput"),
-      searchSuggestions: document.getElementById("searchSuggestions")
+      searchSuggestions: document.getElementById("searchSuggestions"),
     };
   }
 
@@ -57,10 +60,10 @@ class AppController {
    */
   async init() {
     try {
-        const resp = await fetch('js/translations.json');
-        window.TRANSLATIONS = await resp.json();
+      const resp = await fetch("js/translations.json");
+      window.TRANSLATIONS = await resp.json();
     } catch (e) {
-        console.error("Failed to load translations:", e);
+      console.error("Failed to load translations:", e);
     }
 
     if (typeof lucide !== "undefined") lucide.createIcons();
@@ -96,7 +99,7 @@ class AppController {
     this.ui.renderPagesTabs(state.pages, state.activePageId, pageActions);
     this.ui.renderBoard(activePage.groups, proxyActions);
     this._initDragAndDrop();
-    
+
     // Ensure dragging state matches Focus Mode if it was already active
     if (document.body.classList.contains("focus-mode")) {
       this.toggleDragging(false);
@@ -105,11 +108,11 @@ class AppController {
 
   /**
    * Enables or disables all SortableJS instances.
-   * @param {boolean} enabled 
+   * @param {boolean} enabled
    */
   toggleDragging(enabled) {
     if (this.sortableInstances) {
-      this.sortableInstances.forEach(inst => {
+      this.sortableInstances.forEach((inst) => {
         inst.option("disabled", !enabled);
       });
     }
@@ -127,7 +130,9 @@ class AppController {
 
   _getActivePage() {
     const state = this.stateManager.getState();
-    return state.pages.find(p => p.id === state.activePageId) || state.pages[0];
+    return (
+      state.pages.find((p) => p.id === state.activePageId) || state.pages[0]
+    );
   }
 
   _selectPage(id) {
@@ -142,7 +147,7 @@ class AppController {
     state.pages.push({
       id: newId,
       title: this.ui.getTranslation("new_page") || "New Page",
-      groups: []
+      groups: [],
     });
     state.activePageId = newId;
     this._onStateChange(true);
@@ -150,7 +155,7 @@ class AppController {
 
   _renamePage(id, newTitle) {
     const state = this.stateManager.getState();
-    const page = state.pages.find(p => p.id === id);
+    const page = state.pages.find((p) => p.id === id);
     if (page) {
       page.title = newTitle;
       this._onStateChange();
@@ -159,7 +164,7 @@ class AppController {
 
   _deletePage(id) {
     const state = this.stateManager.getState();
-    state.pages = state.pages.filter(p => p.id !== id);
+    state.pages = state.pages.filter((p) => p.id !== id);
     if (state.activePageId === id) {
       state.activePageId = state.pages[0]?.id;
     }
@@ -202,11 +207,16 @@ class AppController {
     const state = this.stateManager.getState();
     if (state.customTemplates) {
       const initialLength = state.customTemplates.length;
-      state.customTemplates = state.customTemplates.filter(t => t.id !== templateId);
-      
+      state.customTemplates = state.customTemplates.filter(
+        (t) => t.id !== templateId,
+      );
+
       if (state.customTemplates.length < initialLength) {
         this.stateManager.save();
-        this.ui.renderTemplates((template) => this._onSelectTemplate(template), this.mediaStorage);
+        this.ui.renderTemplates(
+          (template) => this._onSelectTemplate(template),
+          this.mediaStorage,
+        );
       }
     }
   }
@@ -214,7 +224,7 @@ class AppController {
   _addGroup(targetColIndex) {
     const activePage = this._getActivePage();
     if (!activePage) return;
-    
+
     const state = this.stateManager.getState();
 
     let targetCol = targetColIndex;
@@ -228,7 +238,8 @@ class AppController {
       targetCol = colCounts.indexOf(Math.min(...colCounts));
     }
 
-    const defaultTitle = this.ui.getTranslation("new_group_placeholder") || "New Group";
+    const defaultTitle =
+      this.ui.getTranslation("new_group_placeholder") || "New Group";
     const newId = `group-${Date.now()}`;
     activePage.groups.push({
       id: newId,
@@ -284,7 +295,8 @@ class AppController {
 
     const modalTitle = document.getElementById("modalTitle");
     if (modalTitle) {
-      modalTitle.textContent = this.ui.getTranslation("edit_site_title") || "تعديل الموقع";
+      modalTitle.textContent =
+        this.ui.getTranslation("edit_site_title") || "تعديل الموقع";
     }
 
     this.ui.toggleModal("site", true);
@@ -298,8 +310,7 @@ class AppController {
     let url = inputs.siteUrl.value.trim();
     const desc = inputs.siteDesc ? inputs.siteDesc.value.trim() : "";
 
-    if (!url)
-      return alert(this.ui.getTranslation("site_url_required"));
+    if (!url) return alert(this.ui.getTranslation("site_url_required"));
     if (!url.startsWith("http://") && !url.startsWith("https://"))
       url = `https://${url}`;
 
@@ -326,7 +337,7 @@ class AppController {
   _updateSite(groupId, siteId, name, url, desc) {
     const group = this._findGroup(groupId);
     if (group) {
-      const site = group.sites.find(s => s.id === siteId);
+      const site = group.sites.find((s) => s.id === siteId);
       if (site) {
         site.name = name;
         site.url = url;
@@ -342,11 +353,15 @@ class AppController {
    */
   _bindModalHandlers(modalKey, openTrigger, closeTriggers = []) {
     if (openTrigger) {
-      openTrigger.addEventListener("click", () => this.ui.toggleModal(modalKey, true));
+      openTrigger.addEventListener("click", () =>
+        this.ui.toggleModal(modalKey, true),
+      );
     }
-    closeTriggers.forEach(trigger => {
+    closeTriggers.forEach((trigger) => {
       if (trigger) {
-        trigger.addEventListener("click", () => this.ui.toggleModal(modalKey, false));
+        trigger.addEventListener("click", () =>
+          this.ui.toggleModal(modalKey, false),
+        );
       }
     });
   }
@@ -372,16 +387,28 @@ class AppController {
         inputs.primaryColor.value = settings.primaryColor;
         inputs.cardOpacity.value = settings.cardOpacity;
 
-        if (this.el.colorHexLabel) this.el.colorHexLabel.value = settings.primaryColor.toUpperCase();
+        if (inputs.bgUrl) {
+          inputs.bgUrl.value =
+            (settings.bgType === "preset" || settings.bgType === "videoUrl") &&
+            !settings.bgImage.startsWith("backgrounds/")
+              ? settings.bgImage
+              : "";
+        }
+
+        if (this.el.colorHexLabel)
+          this.el.colorHexLabel.value = settings.primaryColor.toUpperCase();
         this.originalCustomizeSettings = JSON.parse(JSON.stringify(settings));
 
         if (containers.opacityValue) {
           containers.opacityValue.textContent = `${Math.round(settings.cardOpacity * 100)}%`;
         }
 
-        const labelStrong = containers.fileUploadLabel.querySelector("strong span") || containers.fileUploadLabel.querySelector("strong");
-        const labelSpan = containers.fileUploadLabel.querySelector(".upload-sub-text");
-        
+        const labelStrong =
+          containers.fileUploadLabel.querySelector("strong span") ||
+          containers.fileUploadLabel.querySelector("strong");
+        const labelSpan =
+          containers.fileUploadLabel.querySelector(".upload-sub-text");
+
         if (labelStrong) {
           labelStrong.textContent = settings.bgType.startsWith("local")
             ? this.ui.getTranslation("local_file_in_use")
@@ -422,38 +449,104 @@ class AppController {
         const settings = this.stateManager.getState().settings;
         if (inputs.colCount) inputs.colCount.value = settings.columnsCount || 6;
         if (inputs.cardSize) inputs.cardSize.value = settings.cardSize || 100;
-        if (inputs.searchSize) inputs.searchSize.value = settings.searchSize || 100;
-        if (inputs.simpleMode) inputs.simpleMode.checked = settings.simpleMode || false;
-        if (inputs.openInNewTab) inputs.openInNewTab.checked = settings.openInNewTab || false;
-        if (inputs.showSearchBar) inputs.showSearchBar.checked = settings.showSearchBar || false;
-        if (inputs.enableHistorySearch) inputs.enableHistorySearch.checked = settings.enableHistorySearch !== false;
+        if (inputs.searchSize)
+          inputs.searchSize.value = settings.searchSize || 100;
+        if (inputs.simpleMode)
+          inputs.simpleMode.checked = settings.simpleMode || false;
+        if (inputs.openInNewTab)
+          inputs.openInNewTab.checked = settings.openInNewTab || false;
+        if (inputs.showSearchBar)
+          inputs.showSearchBar.checked = settings.showSearchBar || false;
+        if (inputs.enableHistorySearch)
+          inputs.enableHistorySearch.checked =
+            settings.enableHistorySearch !== false;
         if (inputs.language) inputs.language.value = settings.language || "ar";
-        if (inputs.hideScrollbar) inputs.hideScrollbar.checked = settings.hideScrollbar || false;
-        
-        if (containers.colCountValue) containers.colCountValue.textContent = settings.columnsCount || 6;
-        if (containers.cardSizeValue) containers.cardSizeValue.textContent = (settings.cardSize || 100) + "%";
-        if (containers.searchSizeValue) containers.searchSizeValue.textContent = (settings.searchSize || 100) + "%";
+        if (inputs.hideScrollbar)
+          inputs.hideScrollbar.checked = settings.hideScrollbar || false;
+        if (inputs.hideDescription)
+          inputs.hideDescription.checked = settings.hideDescription || false;
+        if (inputs.iconOnlyMode)
+          inputs.iconOnlyMode.checked = settings.iconOnlyMode || false;
+        if (inputs.siteDirection)
+          inputs.siteDirection.value = settings.siteDirection || "auto";
+        if (inputs.hideBorders)
+          inputs.hideBorders.checked = settings.hideBorders || false;
+
+        if (containers.colCountValue)
+          containers.colCountValue.textContent = settings.columnsCount || 6;
+        if (containers.cardSizeValue)
+          containers.cardSizeValue.textContent =
+            (settings.cardSize || 100) + "%";
+        if (containers.searchSizeValue)
+          containers.searchSizeValue.textContent =
+            (settings.searchSize || 100) + "%";
 
         if (containers.searchSizeControlWrap) {
-          containers.searchSizeControlWrap.style.display = settings.showSearchBar ? "block" : "none";
+          containers.searchSizeControlWrap.style.display =
+            settings.showSearchBar ? "block" : "none";
         }
         this.ui.toggleModal("settings", true);
       });
     }
-    
-    this._bindModalHandlers("settings", null, [this.el.cancelSettingsBtn, this.el.closeSettingsX]);
+
+    // Settings Sidebar Navigation
+    const settingsSidebar = document.getElementById("settingsSidebar");
+    if (settingsSidebar) {
+      settingsSidebar.addEventListener("click", (e) => {
+        const navItem = e.target.closest(".settings-nav-item");
+        if (!navItem) return;
+        const section = navItem.dataset.section;
+        if (!section) return;
+
+        // Update active nav item
+        settingsSidebar
+          .querySelectorAll(".settings-nav-item")
+          .forEach((btn) => btn.classList.remove("active"));
+        navItem.classList.add("active");
+
+        // Update active panel
+        const content = document.querySelector(".settings-content");
+        if (content) {
+          content
+            .querySelectorAll(".settings-panel")
+            .forEach((panel) => panel.classList.remove("active"));
+          const targetPanel = content.querySelector(
+            `.settings-panel[data-panel="${section}"]`,
+          );
+          if (targetPanel) targetPanel.classList.add("active");
+        }
+
+        // Re-create icons in the newly visible panel
+        if (typeof lucide !== "undefined") {
+          lucide.createIcons({
+            root: document.getElementById("settingsModal"),
+          });
+        }
+      });
+    }
+
+    this._bindModalHandlers("settings", null, [
+      this.el.cancelSettingsBtn,
+      this.el.closeSettingsX,
+    ]);
 
     // Templates Modal
     if (this.el.templatesBtn) {
       this.el.templatesBtn.addEventListener("click", async () => {
-        await this.ui.renderTemplates((template) => this._onSelectTemplate(template), this.mediaStorage);
+        await this.ui.renderTemplates(
+          (template) => this._onSelectTemplate(template),
+          this.mediaStorage,
+        );
         this.ui.toggleModal("templates", true);
       });
     }
     this._bindModalHandlers("templates", null, [this.el.closeTemplatesX]);
 
     // About Modal
-    this._bindModalHandlers("about", this.el.aboutBtn, [this.el.closeAboutBtn, this.el.closeAboutX]);
+    this._bindModalHandlers("about", this.el.aboutBtn, [
+      this.el.closeAboutBtn,
+      this.el.closeAboutX,
+    ]);
 
     // Data Management
     if (this.el.exportDataBtn) {
@@ -461,8 +554,12 @@ class AppController {
     }
 
     if (this.el.importDataBtn && this.el.importFileInput) {
-      this.el.importDataBtn.addEventListener("click", () => this.el.importFileInput.click());
-      this.el.importFileInput.addEventListener("change", (e) => this._importData(e));
+      this.el.importDataBtn.addEventListener("click", () =>
+        this.el.importFileInput.click(),
+      );
+      this.el.importFileInput.addEventListener("change", (e) =>
+        this._importData(e),
+      );
     }
 
     inputs.bgFile.addEventListener("change", async (e) => {
@@ -472,11 +569,16 @@ class AppController {
       const isVideo = file.type.startsWith("video/");
       const settings = this.stateManager.getState().settings;
 
-      const labelStrong = document.querySelector("#fileUploadLabel strong span") || document.querySelector("#fileUploadLabel strong");
-      const labelSpan = document.querySelector("#fileUploadLabel .upload-sub-text");
+      const labelStrong =
+        document.querySelector("#fileUploadLabel strong span") ||
+        document.querySelector("#fileUploadLabel strong");
+      const labelSpan = document.querySelector(
+        "#fileUploadLabel .upload-sub-text",
+      );
 
       if (labelStrong)
-        labelStrong.textContent = this.ui.getTranslation("saving") || "جاري الحفظ...";
+        labelStrong.textContent =
+          this.ui.getTranslation("saving") || "جاري الحفظ...";
       if (labelSpan) labelSpan.textContent = file.name;
 
       document.getElementById("saveCustomizeBtn").disabled = true;
@@ -495,6 +597,37 @@ class AppController {
       await this.ui.updateUserMediaPreview(this.mediaStorage, settings);
     });
 
+    if (inputs.bgUrl) {
+      inputs.bgUrl.addEventListener("change", async (e) => {
+        const url = e.target.value.trim();
+        if (!url) return;
+
+        const isVideo =
+          url.match(/\.(mp4|webm|ogg)$/i) ||
+          url.includes("youtube") ||
+          url.includes("vimeo") ||
+          url.includes("video");
+        const settings = this.stateManager.getState().settings;
+
+        settings.bgType = isVideo ? "videoUrl" : "preset";
+        settings.bgImage = url;
+
+        const labelStrong =
+          document.querySelector("#fileUploadLabel strong span") ||
+          document.querySelector("#fileUploadLabel strong");
+        const labelSpan = document.querySelector(
+          "#fileUploadLabel .upload-sub-text",
+        );
+        if (labelStrong)
+          labelStrong.textContent =
+            this.ui.getTranslation("upload_success") || "تم إضافة الرابط بنجاح";
+        if (labelSpan) labelSpan.textContent = url;
+
+        document.getElementById("saveCustomizeBtn").disabled = false;
+        await this.ui.updateUserMediaPreview(this.mediaStorage, settings);
+      });
+    }
+
     document
       .getElementById("saveCustomizeBtn")
       .addEventListener("click", async () => {
@@ -511,19 +644,23 @@ class AppController {
     const saveAsTemplateBtn = document.getElementById("saveAsTemplateBtn");
     if (saveAsTemplateBtn) {
       saveAsTemplateBtn.addEventListener("click", () => {
-        const templateName = prompt(this.ui.getTranslation("template_name_prompt") || "Enter template name:");
+        const templateName = prompt(
+          this.ui.getTranslation("template_name_prompt") ||
+            "Enter template name:",
+        );
         if (!templateName) return;
 
         const state = this.stateManager.getState();
         const settings = state.settings;
-        
+
         // Save current modifications first
         settings.themeMode = inputs.themeMode.checked ? "light" : "dark";
         settings.primaryColor = inputs.primaryColor.value;
         settings.cardOpacity = parseFloat(inputs.cardOpacity.value);
-        
-        const isVideo = settings.bgType === "localVideo" || settings.bgType === "videoUrl";
-        
+
+        const isVideo =
+          settings.bgType === "localVideo" || settings.bgType === "videoUrl";
+
         state.customTemplates = state.customTemplates || [];
         state.customTemplates.unshift({
           id: `tem-custom-${Date.now()}`,
@@ -536,14 +673,14 @@ class AppController {
           color: settings.primaryColor,
           opacity: settings.cardOpacity,
           theme: settings.themeMode,
-          isCustom: true
+          isCustom: true,
         });
 
         // Add dynamic translation for this session
         const lang = settings.language || "ar";
         if (window.TRANSLATIONS) {
-            window.TRANSLATIONS[lang] = window.TRANSLATIONS[lang] || {};
-            window.TRANSLATIONS[lang][state.customTemplates[0].id] = templateName;
+          window.TRANSLATIONS[lang] = window.TRANSLATIONS[lang] || {};
+          window.TRANSLATIONS[lang][state.customTemplates[0].id] = templateName;
         }
 
         this._onStateChange(true);
@@ -622,6 +759,13 @@ class AppController {
       if (inputs.language) settings.language = inputs.language.value;
       if (inputs.hideScrollbar)
         settings.hideScrollbar = inputs.hideScrollbar.checked;
+      if (inputs.hideDescription)
+        settings.hideDescription = inputs.hideDescription.checked;
+      if (inputs.iconOnlyMode)
+        settings.iconOnlyMode = inputs.iconOnlyMode.checked;
+      if (inputs.siteDirection)
+        settings.siteDirection = inputs.siteDirection.value;
+      if (inputs.hideBorders) settings.hideBorders = inputs.hideBorders.checked;
       this.ui.applySettings(settings, this.mediaStorage);
       this._onStateChange(true);
       // Modal remains open as per user request
@@ -630,7 +774,9 @@ class AppController {
     if (inputs.showSearchBar) {
       inputs.showSearchBar.addEventListener("change", (e) => {
         if (containers.searchSizeControlWrap) {
-          containers.searchSizeControlWrap.style.display = e.target.checked ? "block" : "none";
+          containers.searchSizeControlWrap.style.display = e.target.checked
+            ? "block"
+            : "none";
         }
       });
     }
@@ -648,23 +794,32 @@ class AppController {
           settings.openInNewTab = false;
           settings.showSearchBar = true;
           settings.enableHistorySearch = true;
-          settings.language = 'en';
-          
+          settings.language = "en";
+
           // Background/Appearance defaults
-          settings.themeMode = 'dark';
-          settings.primaryColor = '#FF2E32';
+          settings.themeMode = "dark";
+          settings.primaryColor = "#FF2E32";
           settings.cardOpacity = 0.1;
-          settings.bgType = 'videoUrl';
-          settings.bgImage = 'backgrounds/1111.mp4';
+          settings.bgType = "videoUrl";
+          settings.bgImage = "backgrounds/1111.mp4";
 
           // Update inputs if they exist
           if (inputs.simpleMode) inputs.simpleMode.checked = true;
           if (inputs.openInNewTab) inputs.openInNewTab.checked = false;
           if (inputs.showSearchBar) inputs.showSearchBar.checked = true;
-          if (inputs.enableHistorySearch) inputs.enableHistorySearch.checked = true;
-          if (inputs.language) inputs.language.value = 'en';
+          if (inputs.enableHistorySearch)
+            inputs.enableHistorySearch.checked = true;
+          if (inputs.language) inputs.language.value = "en";
           if (inputs.hideScrollbar) inputs.hideScrollbar.checked = false;
-          
+          if (inputs.hideDescription) inputs.hideDescription.checked = false;
+          if (inputs.iconOnlyMode) inputs.iconOnlyMode.checked = false;
+          if (inputs.siteDirection) inputs.siteDirection.value = "auto";
+          settings.hideDescription = false;
+          settings.iconOnlyMode = false;
+          settings.siteDirection = "auto";
+          settings.hideBorders = false;
+          if (inputs.hideBorders) inputs.hideBorders.checked = false;
+
           this.ui.applySettings(settings, this.mediaStorage);
           this._onStateChange(true);
           // Modal remains open as per user request
@@ -700,8 +855,8 @@ class AppController {
       .getElementById("cancelSiteBtn")
       .addEventListener("click", () => this.ui.toggleModal("site", false));
 
-     const siteModalInputs = [inputs.siteName, inputs.siteUrl, inputs.siteDesc];
-    siteModalInputs.forEach(input => {
+    const siteModalInputs = [inputs.siteName, inputs.siteUrl, inputs.siteDesc];
+    siteModalInputs.forEach((input) => {
       if (input) {
         input.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
@@ -718,18 +873,27 @@ class AppController {
         const url = inputs.siteUrl.value.trim();
         if (url && !inputs.siteName.value.trim()) {
           let normalizedUrl = url;
-          if (!normalizedUrl.startsWith("http://") && !normalizedUrl.startsWith("https://"))
+          if (
+            !normalizedUrl.startsWith("http://") &&
+            !normalizedUrl.startsWith("https://")
+          )
             normalizedUrl = `https://${normalizedUrl}`;
-          
+
           const loader = document.getElementById("siteNameLoader");
           if (loader) loader.classList.remove("hidden");
 
           setTimeout(() => {
             try {
-              const domain = new URL(normalizedUrl).hostname.replace("www.", "");
+              const domain = new URL(normalizedUrl).hostname.replace(
+                "www.",
+                "",
+              );
               const name = domain.split(".")[0];
-              inputs.siteName.value = name.charAt(0).toUpperCase() + name.slice(1);
-            } catch { /* invalid URL, skip */ }
+              inputs.siteName.value =
+                name.charAt(0).toUpperCase() + name.slice(1);
+            } catch {
+              /* invalid URL, skip */
+            }
             if (loader) loader.classList.add("hidden");
           }, 400);
         }
@@ -756,10 +920,12 @@ class AppController {
       }
     });
 
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', (e) => {
+    document.querySelectorAll(".modal-overlay").forEach((overlay) => {
+      overlay.addEventListener("click", (e) => {
         if (e.target === overlay) {
-          const closeBtn = overlay.querySelector('#closeCustomizeX, #closeSettingsX, #closeTemplatesX, #closeAboutX, #cancelSiteBtn');
+          const closeBtn = overlay.querySelector(
+            "#closeCustomizeX, #closeSettingsX, #closeTemplatesX, #closeAboutX, #cancelSiteBtn",
+          );
           if (closeBtn) closeBtn.click();
         }
       });
@@ -769,7 +935,9 @@ class AppController {
     document.addEventListener("keydown", (e) => {
       // Don't trigger if focus is in an input/textarea/editable
       const activeEl = document.activeElement;
-      const isInput = ["INPUT", "TEXTAREA", "SELECT"].includes(activeEl.tagName) || activeEl.isContentEditable;
+      const isInput =
+        ["INPUT", "TEXTAREA", "SELECT"].includes(activeEl.tagName) ||
+        activeEl.isContentEditable;
       if (isInput) return;
 
       // Group shortcut: Alt + G (New Group)
@@ -801,9 +969,11 @@ class AppController {
     settings.primaryColor = preset.color;
     settings.themeMode = preset.theme;
 
-    const labelStrong = containers.fileUploadLabel.querySelector("strong span") || containers.fileUploadLabel.querySelector("strong");
+    const labelStrong =
+      containers.fileUploadLabel.querySelector("strong span") ||
+      containers.fileUploadLabel.querySelector("strong");
     if (labelStrong) {
-        labelStrong.textContent = this.ui.getTranslation("upload_bg");
+      labelStrong.textContent = this.ui.getTranslation("upload_bg");
     }
     inputs.bgFile.value = "";
 
@@ -820,15 +990,20 @@ class AppController {
     const settings = this.stateManager.getState().settings;
 
     if (template.isCustom) {
-        // Handle custom template which might be local file conceptually.
-        // Actually, for local file custom templates, we need to handle media properly.
-        // If url is empty, it meant it was a local file when saved. 
-        // We'll trust whatever is in indexeddb customBg is still there.
-        settings.bgType = template.type === "video" 
-            ? (template.url ? "videoUrl" : "localVideo")
-            : (template.url ? "preset" : "localImage");
+      // Handle custom template which might be local file conceptually.
+      // Actually, for local file custom templates, we need to handle media properly.
+      // If url is empty, it meant it was a local file when saved.
+      // We'll trust whatever is in indexeddb customBg is still there.
+      settings.bgType =
+        template.type === "video"
+          ? template.url
+            ? "videoUrl"
+            : "localVideo"
+          : template.url
+            ? "preset"
+            : "localImage";
     } else {
-        settings.bgType = template.type === "video" ? "videoUrl" : "preset";
+      settings.bgType = template.type === "video" ? "videoUrl" : "preset";
     }
 
     settings.bgImage = template.url || "";
@@ -932,13 +1107,15 @@ class AppController {
   _exportData() {
     const state = this.stateManager.getState();
     const dataStr = JSON.stringify(state, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    const dataUri =
+      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
 
-    const exportFileDefaultName = 'controltap-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    const exportFileDefaultName =
+      "controltap-backup-" + new Date().toISOString().slice(0, 10) + ".json";
 
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
     linkElement.click();
   }
 
@@ -950,7 +1127,7 @@ class AppController {
     reader.onload = (e) => {
       try {
         const importedState = JSON.parse(e.target.result);
-        
+
         // Basic validation: must have pages or settings
         if (!importedState.pages && !importedState.settings) {
           throw new Error("Invalid structure");
@@ -970,24 +1147,24 @@ class AppController {
     };
     reader.readAsText(file);
     // Reset input
-    event.target.value = '';
+    event.target.value = "";
   }
 
   /**
    * Shows a toast notification at the bottom of the screen.
    */
   _showToast(message, duration = 2500) {
-    let toast = document.getElementById('shortcut-toast');
+    let toast = document.getElementById("shortcut-toast");
     if (!toast) {
-      toast = document.createElement('div');
-      toast.id = 'shortcut-toast';
+      toast = document.createElement("div");
+      toast.id = "shortcut-toast";
       document.body.appendChild(toast);
     }
     toast.textContent = message;
-    toast.classList.add('show');
+    toast.classList.add("show");
     clearTimeout(this._toastTimer);
     this._toastTimer = setTimeout(() => {
-      toast.classList.remove('show');
+      toast.classList.remove("show");
     }, duration);
   }
 
@@ -997,8 +1174,15 @@ class AppController {
    * @returns {Array} Only user-navigable tabs
    */
   _filterValidTabs(tabs) {
-    const INTERNAL_PREFIXES = ['chrome://', 'chrome-extension://', 'about:', 'edge://'];
-    return tabs.filter(t => t.url && !INTERNAL_PREFIXES.some(p => t.url.startsWith(p)));
+    const INTERNAL_PREFIXES = [
+      "chrome://",
+      "chrome-extension://",
+      "about:",
+      "edge://",
+    ];
+    return tabs.filter(
+      (t) => t.url && !INTERNAL_PREFIXES.some((p) => t.url.startsWith(p)),
+    );
   }
 
   /**
@@ -1007,31 +1191,42 @@ class AppController {
    * is the extension itself. We find the last real tab the user was on instead.
    */
   async _addCurrentTab() {
-    if (typeof chrome === 'undefined' || !chrome.tabs) return;
+    if (typeof chrome === "undefined" || !chrome.tabs) return;
     try {
       const allTabs = await chrome.tabs.query({ currentWindow: true });
       const realTabs = this._filterValidTabs(allTabs);
 
       if (realTabs.length === 0) {
-        this._showToast(this.ui.getTranslation('no_valid_tab') || 'No valid tab to add');
+        this._showToast(
+          this.ui.getTranslation("no_valid_tab") || "No valid tab to add",
+        );
         return;
       }
 
-      const targetTab = realTabs.sort((a, b) => (b.lastAccessed || 0) - (a.lastAccessed || 0))[0];
+      const targetTab = realTabs.sort(
+        (a, b) => (b.lastAccessed || 0) - (a.lastAccessed || 0),
+      )[0];
       const siteName = targetTab.title || new URL(targetTab.url).hostname;
       const groupId = this._addGroup();
       if (groupId) {
         const group = this._findGroup(groupId);
         if (group) {
           group.title = siteName;
-          group.sites.push({ id: `site-${Date.now()}`, name: siteName, url: targetTab.url, desc: '' });
+          group.sites.push({
+            id: `site-${Date.now()}`,
+            name: siteName,
+            url: targetTab.url,
+            desc: "",
+          });
           this.stateManager.save();
           this.renderAll();
         }
       }
-      this._showToast(this.ui.getTranslation('tab_added') || `✓ Added: ${siteName}`);
+      this._showToast(
+        this.ui.getTranslation("tab_added") || `✓ Added: ${siteName}`,
+      );
     } catch (err) {
-      console.error('Failed to add current tab:', err);
+      console.error("Failed to add current tab:", err);
     }
   }
 
@@ -1039,34 +1234,43 @@ class AppController {
    * Alt + A: Collect ALL open tabs in the current window and put them into a single new group.
    */
   async _addAllTabsToGroup() {
-    if (typeof chrome === 'undefined' || !chrome.tabs) return;
+    if (typeof chrome === "undefined" || !chrome.tabs) return;
     try {
       const allTabs = await chrome.tabs.query({ currentWindow: true });
       const validTabs = this._filterValidTabs(allTabs);
       if (validTabs.length === 0) {
-        this._showToast(this.ui.getTranslation('no_valid_tabs') || 'No valid tabs to collect');
+        this._showToast(
+          this.ui.getTranslation("no_valid_tabs") || "No valid tabs to collect",
+        );
         return;
       }
       const groupId = this._addGroup();
       if (groupId) {
         const group = this._findGroup(groupId);
         if (group) {
-          group.title = (this.ui.getTranslation('collected_tabs') || 'Collected Tabs') + ` (${validTabs.length})`;
-          validTabs.forEach(tab => {
+          group.title =
+            (this.ui.getTranslation("collected_tabs") || "Collected Tabs") +
+            ` (${validTabs.length})`;
+          validTabs.forEach((tab) => {
             group.sites.push({
               id: `site-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
               name: tab.title || new URL(tab.url).hostname,
               url: tab.url,
-              desc: ''
+              desc: "",
             });
           });
           this.stateManager.save();
           this.renderAll();
         }
       }
-      this._showToast((this.ui.getTranslation('tabs_collected') || `✓ Collected ${validTabs.length} tabs`).replace('{count}', validTabs.length));
+      this._showToast(
+        (
+          this.ui.getTranslation("tabs_collected") ||
+          `✓ Collected ${validTabs.length} tabs`
+        ).replace("{count}", validTabs.length),
+      );
     } catch (err) {
-      console.error('Failed to collect tabs:', err);
+      console.error("Failed to collect tabs:", err);
     }
   }
 
@@ -1087,27 +1291,37 @@ class AppController {
       if (!suggestion) return;
       const currentSettings = this.stateManager.getState().settings;
       const target = currentSettings.openInNewTab ? "_blank" : "_self";
-      
-      if (suggestion.type === "site" || suggestion.type === "exact_site" || suggestion.type === "history") {
+
+      if (
+        suggestion.type === "site" ||
+        suggestion.type === "exact_site" ||
+        suggestion.type === "history"
+      ) {
         window.open(suggestion.url, target);
       } else {
         const query = suggestion.text.trim();
-        const isUrl = /^https?:\/\//i.test(query) || 
-                      /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}(:\d+)?(\/.*)?$/i.test(query);
+        const isUrl =
+          /^https?:\/\//i.test(query) ||
+          /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}(:\d+)?(\/.*)?$/i.test(query);
 
         if (isUrl) {
-          const finalUrl = /^https?:\/\//i.test(query) ? query : `https://${query}`;
+          const finalUrl = /^https?:\/\//i.test(query)
+            ? query
+            : `https://${query}`;
           window.open(finalUrl, target);
         } else {
           const state = this.stateManager.getState();
           state.searchHistory = state.searchHistory || [];
-          state.searchHistory = state.searchHistory.filter(h => h !== query);
+          state.searchHistory = state.searchHistory.filter((h) => h !== query);
           state.searchHistory.unshift(query);
           if (state.searchHistory.length > 30) state.searchHistory.pop();
           this.stateManager.save();
-          
+
           const encodedQuery = encodeURIComponent(query);
-          window.open(`https://www.google.com/search?q=${encodedQuery}`, target);
+          window.open(
+            `https://www.google.com/search?q=${encodedQuery}`,
+            target,
+          );
         }
       }
 
@@ -1121,7 +1335,11 @@ class AppController {
       const query = searchInput.value.trim();
       currentSuggestions = await this.searchEngine.getSuggestions(query);
       selectedIndex = -1;
-      this.ui.renderSearchSuggestions(currentSuggestions, selectedIndex, performAction);
+      this.ui.renderSearchSuggestions(
+        currentSuggestions,
+        selectedIndex,
+        performAction,
+      );
     };
 
     searchInput.addEventListener("focus", handleInput);
@@ -1140,12 +1358,23 @@ class AppController {
         }
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
-        selectedIndex = Math.min(selectedIndex + 1, currentSuggestions.length - 1);
-        this.ui.renderSearchSuggestions(currentSuggestions, selectedIndex, performAction);
+        selectedIndex = Math.min(
+          selectedIndex + 1,
+          currentSuggestions.length - 1,
+        );
+        this.ui.renderSearchSuggestions(
+          currentSuggestions,
+          selectedIndex,
+          performAction,
+        );
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         selectedIndex = Math.max(selectedIndex - 1, -1);
-        this.ui.renderSearchSuggestions(currentSuggestions, selectedIndex, performAction);
+        this.ui.renderSearchSuggestions(
+          currentSuggestions,
+          selectedIndex,
+          performAction,
+        );
       } else if (e.key === "Escape") {
         suggestionsBox.classList.add("hidden");
         searchInput.blur();
@@ -1154,7 +1383,10 @@ class AppController {
 
     // Handle clicks outside of search
     document.addEventListener("click", (e) => {
-      if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+      if (
+        !searchInput.contains(e.target) &&
+        !suggestionsBox.contains(e.target)
+      ) {
         suggestionsBox.classList.add("hidden");
       }
     });
@@ -1162,18 +1394,18 @@ class AppController {
 
   /**
    * Shows a temporary toast message to the user.
-   * @param {string} msg 
+   * @param {string} msg
    * @private
    */
   _showToast(msg) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-notification';
+    const toast = document.createElement("div");
+    toast.className = "toast-notification";
     toast.textContent = msg;
     document.body.appendChild(toast);
     setTimeout(() => {
-      toast.classList.add('show');
+      toast.classList.add("show");
       setTimeout(() => {
-        toast.classList.remove('show');
+        toast.classList.remove("show");
         setTimeout(() => toast.remove(), 300);
       }, 3000);
     }, 100);

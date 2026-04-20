@@ -17,7 +17,8 @@
   "permissions": [
     "unlimitedStorage",
     "history",
-    "tabs"
+    "tabs",
+    "favicon"
   ],
   "commands": {
     "add-current-tab": {

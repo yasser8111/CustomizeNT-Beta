@@ -24,7 +24,6 @@
     <link rel="stylesheet" href="css/modals.css" />
     <link rel="stylesheet" href="css/customize.css" />
     <link rel="stylesheet" href="css/focus-mode.css" />
-
   </head>
   <body class="light-theme">
     <!-- خلفية الفيديو -->
@@ -141,7 +140,14 @@
     <div id="searchBarWrapper" class="search-bar-wrapper hidden">
       <div class="search-box-container">
         <div class="search-box">
-          <input type="text" id="searchInput" placeholder="Search the web..." data-i18n-placeholder="search_placeholder" dir="ltr" autocomplete="off" />
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search the web..."
+            data-i18n-placeholder="search_placeholder"
+            dir="ltr"
+            autocomplete="off"
+          />
         </div>
         <div id="searchSuggestions" class="search-suggestions hidden"></div>
       </div>
@@ -198,7 +204,16 @@
       >
         <div class="modal-header">
           <h2 data-i18n="customize_title">تخصيص الواجهة</h2>
-          <button id="closeCustomizeX" class="header-btn" style="padding: 10px; justify-content: center; height: 42px; width: 42px;">
+          <button
+            id="closeCustomizeX"
+            class="header-btn"
+            style="
+              padding: 10px;
+              justify-content: center;
+              height: 42px;
+              width: 42px;
+            "
+          >
             <i data-lucide="x" width="20" height="20"></i>
           </button>
         </div>
@@ -213,21 +228,71 @@
               </h3>
               <div style="display: flex; flex-direction: column; gap: 16px">
                 <!-- الوضع الفاتح -->
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <label for="themeModeInput" style="margin: 0; cursor: pointer; font-weight: 600; color: var(--text-color); font-size: 14px;" data-i18n="light_mode">الوضع الفاتح</label>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                  "
+                >
+                  <label
+                    for="themeModeInput"
+                    style="
+                      margin: 0;
+                      cursor: pointer;
+                      font-weight: 600;
+                      color: var(--text-color);
+                      font-size: 14px;
+                    "
+                    data-i18n="light_mode"
+                    >الوضع الفاتح</label
+                  >
                   <label class="switch">
                     <input type="checkbox" id="themeModeInput" />
                     <span class="slider round"></span>
                   </label>
                 </div>
                 <!-- خط فاصل -->
-                <div style="height: 1px; background: var(--border-color); opacity: 0.5;"></div>
+                <div
+                  style="
+                    height: 1px;
+                    background: var(--border-color);
+                    opacity: 0.5;
+                  "
+                ></div>
                 <!-- اللون الأساسي -->
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-weight: 600; color: var(--text-color); font-size: 14px;" data-i18n="primary_color">اللون الأساسي</span>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                  "
+                >
+                  <span
+                    style="
+                      font-weight: 600;
+                      color: var(--text-color);
+                      font-size: 14px;
+                    "
+                    data-i18n="primary_color"
+                    >اللون الأساسي</span
+                  >
                   <div class="color-input-wrapper" style="gap: 12px">
-                    <input type="color" id="primaryColorInput" value="#3b82f6" />
-                    <input type="text" id="colorHexLabel" class="hex-input-premium" value="#3B82F6" maxlength="7" spellcheck="false" dir="ltr" style="text-align: left; width: 75px" />
+                    <input
+                      type="color"
+                      id="primaryColorInput"
+                      value="#3b82f6"
+                    />
+                    <input
+                      type="text"
+                      id="colorHexLabel"
+                      class="hex-input-premium"
+                      value="#3B82F6"
+                      maxlength="7"
+                      spellcheck="false"
+                      dir="ltr"
+                      style="text-align: left; width: 75px"
+                    />
                   </div>
                 </div>
               </div>
@@ -235,47 +300,166 @@
 
             <!-- الشفافية -->
             <div class="option-group-premium range-container-premium">
-              <div class="range-info" style="margin-bottom: 16px; align-items: center">
-                <span id="opacityValueDisplay" class="range-value-large" style="margin: 0">25%</span>
-                <span class="range-label-sub" style="font-weight: 600; color: var(--text-color); opacity: 0.8; font-size: 14px;" data-i18n="card_opacity">شفافية البطاقات</span>
+              <div
+                class="range-info"
+                style="margin-bottom: 16px; align-items: center"
+              >
+                <span
+                  id="opacityValueDisplay"
+                  class="range-value-large"
+                  style="margin: 0"
+                  >25%</span
+                >
+                <span
+                  class="range-label-sub"
+                  style="
+                    font-weight: 600;
+                    color: var(--text-color);
+                    opacity: 0.8;
+                    font-size: 14px;
+                  "
+                  data-i18n="card_opacity"
+                  >شفافية البطاقات</span
+                >
               </div>
-              <input type="range" id="cardOpacityInput" min="0" max="0.9" step="0.05" value="0.25" class="slider-premium" />
+              <input
+                type="range"
+                id="cardOpacityInput"
+                min="0"
+                max="0.9"
+                step="0.05"
+                value="0.25"
+                class="slider-premium"
+              />
             </div>
 
             <!-- مجموعة: الخلفية (بدون إطار إضافي) -->
-            <div class="upload-container-premium" style="margin-top: 8px;">
-              <input type="file" id="bgFileInput" accept="image/*,video/*" hidden />
-              <label for="bgFileInput" id="fileUploadLabel" class="upload-area-premium" style="cursor: pointer; width: 100%; display: flex; box-sizing: border-box; align-items: center; gap: 12px;">
+            <div class="upload-container-premium" style="margin-top: 8px">
+              <input
+                type="file"
+                id="bgFileInput"
+                accept="image/*,video/*"
+                hidden
+              />
+              <label
+                for="bgFileInput"
+                id="fileUploadLabel"
+                class="upload-area-premium"
+                style="
+                  cursor: pointer;
+                  width: 100%;
+                  display: flex;
+                  box-sizing: border-box;
+                  align-items: center;
+                  gap: 12px;
+                "
+              >
                 <div class="upload-icon-box">
-                  <i data-lucide="image-plus" width="24" height="24" style="color: var(--primary-color);"></i>
+                  <i
+                    data-lucide="image-plus"
+                    width="24"
+                    height="24"
+                    style="color: var(--primary-color)"
+                  ></i>
                 </div>
                 <div class="upload-text-box">
-                  <strong><span style="color: var(--primary-color); font-size: 14px;" data-i18n="upload_bg">ارفع صورة أو فيديو</span></strong>
-                  <div class="upload-sub-text" style="font-size: 12px; margin-top: 4px; opacity: 0.7;" data-i18n="upload_sub">سيتم حفظ الملف محلياً</div>
+                  <strong
+                    ><span
+                      style="color: var(--primary-color); font-size: 14px"
+                      data-i18n="upload_bg"
+                      >ارفع صورة أو فيديو</span
+                    ></strong
+                  >
+                  <div
+                    class="upload-sub-text"
+                    style="font-size: 12px; margin-top: 4px; opacity: 0.7"
+                    data-i18n="upload_sub"
+                  >
+                    سيتم حفظ الملف محلياً
+                  </div>
                 </div>
               </label>
+
+              <!-- إدخال رابط الخلفية -->
+              <div style="margin-top: 12px">
+                <input
+                  type="url"
+                  id="bgUrlInput"
+                  class="url-input-premium"
+                  placeholder="أو أدخل رابط صورة / فيديو للـ خلفية..."
+                  data-i18n-placeholder="bg_url_placeholder"
+                  dir="ltr"
+                  style="
+                    width: 100%;
+                    padding: 10px;
+                    border-radius: var(--radius-md);
+                    border: 1px solid var(--border-color);
+                    background: var(--bg-color);
+                    color: var(--text-color);
+                    font-size: 13px;
+                    outline: none;
+                    transition: border-color 0.2s;
+                  "
+                />
+              </div>
             </div>
           </div>
 
           <!-- الجانب الأيسر: المعاينة الحية والأزرار السفلية -->
-          <div style="display: flex; flex-direction: column; gap: var(--space-xl); height: 100%;">
-            <div class="customize-preview-side" style="flex: 1;">
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: var(--space-xl);
+              height: 100%;
+            "
+          >
+            <div class="customize-preview-side" style="flex: 1">
               <div id="currentUserMediaPreview" class="live-preview-content">
-                <div class="preview-loading-placeholder" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-                  <div class="skeleton-box" style="width: 100%; height: 100%; border-radius: 0;"></div>
+                <div
+                  class="preview-loading-placeholder"
+                  style="
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  <div
+                    class="skeleton-box"
+                    style="width: 100%; height: 100%; border-radius: 0"
+                  ></div>
                 </div>
               </div>
             </div>
 
             <!-- أزرار التحكم السفلية تحت الصورة -->
-            <div class="customize-footer-premium" style="margin-top: auto; display: flex; gap: 8px;">
-              <button id="cancelCustomizeBtn" class="btn btn-cancel" style="flex: 1; justify-content: center;">
+            <div
+              class="customize-footer-premium"
+              style="margin-top: auto; display: flex; gap: 8px"
+            >
+              <button
+                id="cancelCustomizeBtn"
+                class="btn btn-cancel"
+                style="flex: 1; justify-content: center"
+              >
                 <span data-i18n="cancel">إلغاء</span>
               </button>
-              <button id="saveAsTemplateBtn" class="btn btn-cancel" style="flex: 1; justify-content: center;" data-i18n="save_as_template">
+              <button
+                id="saveAsTemplateBtn"
+                class="btn btn-cancel"
+                style="flex: 1; justify-content: center"
+                data-i18n="save_as_template"
+              >
                 حفظ كقالب
               </button>
-              <button id="saveCustomizeBtn" class="btn-primary-premium" style="flex: 1; justify-content: center;" data-i18n="save_changes">
+              <button
+                id="saveCustomizeBtn"
+                class="btn-primary-premium"
+                style="flex: 1; justify-content: center"
+                data-i18n="save_changes"
+              >
                 حفظ التغييرات
               </button>
             </div>
@@ -304,7 +488,16 @@
           >
             اختر مظهرك المفضل
           </h2>
-          <button id="closeTemplatesX" class="header-btn" style="padding: 10px; justify-content: center; height: 42px; width: 42px;">
+          <button
+            id="closeTemplatesX"
+            class="header-btn"
+            style="
+              padding: 10px;
+              justify-content: center;
+              height: 42px;
+              width: 42px;
+            "
+          >
             <i data-lucide="x" width="20" height="20"></i>
           </button>
         </div>
@@ -319,313 +512,298 @@
       </div>
     </div>
 
-    <!-- نافذة الإعدادات العامة (الجديدة) -->
+    <!-- نافذة الإعدادات العامة (مُعاد تصميمها بنظام Sidebar) -->
     <div id="settingsModal" class="modal-overlay">
-      <div class="modal">
-        <div class="modal-header" style="margin-bottom: 20px;">
-          <h2 style="margin: 0; font-size: 24px;" data-i18n="general_settings">الإعدادات العامة</h2>
-          <button id="closeSettingsX" class="header-btn" style="padding: 10px; justify-content: center; height: 42px; width: 42px;">
+      <div class="modal settings-modal-redesigned">
+        <!-- Header -->
+        <div class="settings-modal-header">
+          <h2 data-i18n="general_settings">الإعدادات العامة</h2>
+          <button id="closeSettingsX" class="header-btn settings-close-btn">
             <i data-lucide="x" width="20" height="20"></i>
           </button>
         </div>
 
+        <!-- Body: Sidebar + Content -->
+        <div class="settings-body">
+          <!-- Sidebar Navigation -->
+          <nav class="settings-sidebar" id="settingsSidebar">
+            <button class="settings-nav-item active" data-section="general">
+              <i data-lucide="sliders-horizontal" width="18" height="18"></i>
+              <span data-i18n="settings_section_general">عام</span>
+            </button>
+            <button class="settings-nav-item" data-section="display">
+              <i data-lucide="eye" width="18" height="18"></i>
+              <span data-i18n="settings_section_display">العرض</span>
+            </button>
+            <button class="settings-nav-item" data-section="layout">
+              <i data-lucide="layout-grid" width="18" height="18"></i>
+              <span data-i18n="settings_section_layout">التخطيط</span>
+            </button>
+            <button class="settings-nav-item" data-section="data">
+              <i data-lucide="database" width="18" height="18"></i>
+              <span data-i18n="settings_section_data">البيانات</span>
+            </button>
+          </nav>
 
-        <div class="setting-group">
-          <label data-i18n="minimalist_settings">إعدادات البساطة (Minimalist)</label>
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: 12px;
-            "
-          >
-            <span
-              style="font-size: 14px; color: var(--text-color); opacity: 0.9"
-              data-i18n="simple_mode"
-              >وضع الواجهة البسيط (إخفاء النصوص)</span
-            >
-            <label class="switch">
-              <input type="checkbox" id="simpleModeInput" />
-              <span class="slider round"></span>
-            </label>
-          </div>
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-            "
-          >
-            <span
-              style="font-size: 14px; color: var(--text-color); opacity: 0.9"
-              data-i18n="hide_scrollbar"
-              >إخفاء شريط التمرير</span
-            >
-            <label class="switch">
-              <input type="checkbox" id="hideScrollbarInput" />
-              <span class="slider round"></span>
-            </label>
-          </div>
-        </div>
-
-        <div class="setting-group">
-          <label data-i18n="display_behavior_settings">خيارات العرض والروابط</label>
-          
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: 12px;
-            "
-          >
-            <span
-              style="font-size: 14px; color: var(--text-color); opacity: 0.9"
-              data-i18n="open_new_tab"
-              >فتح المواقع في علامة تبويب جديدة</span
-            >
-            <label class="switch">
-              <input type="checkbox" id="openInNewTabInput" />
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: 12px;
-            "
-          >
-            <span
-              style="font-size: 14px; color: var(--text-color); opacity: 0.9"
-              data-i18n="show_search_bar"
-              >إظهار شريط البحث</span
-            >
-            <label class="switch">
-              <input type="checkbox" id="showSearchBarInput" />
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: 12px;
-            "
-          >
-            <span
-              style="font-size: 14px; color: var(--text-color); opacity: 0.9"
-              data-i18n="enable_history_search"
-              >تفعيل اقتراحات سجل التصفح</span
-            >
-            <label class="switch">
-              <input type="checkbox" id="enableHistorySearchInput" />
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div
-            style="
-              height: 1px;
-              background: var(--border-color);
-              opacity: 0.3;
-              margin: 12px 0;
-            "
-          ></div>
-          
-          <div>
-            <label data-i18n="language" style="display: block; font-size: 13px; margin-bottom: 8px; opacity: 0.8;">اللغة</label>
-            <select id="languageInput" class="theme-select" style="width: 100%;">
-              <option value="ar">العربية</option>
-              <option value="en">English</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="setting-group">
-          <label data-i18n="board_layout_settings">تخطيط لوحة المعلومات</label>
-          <div style="margin-bottom: 16px">
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 8px;
-              "
-            >
-              <span
-                style="font-size: 14px; color: var(--text-color); opacity: 0.9"
-                data-i18n="column_count"
-                >عدد الأعمدة</span
+          <!-- Content Panels -->
+          <div class="settings-content">
+            <!-- ═══════ القسم: عام ═══════ -->
+            <div class="settings-panel active" data-panel="general">
+              <h3
+                class="settings-panel-title"
+                data-i18n="settings_section_general"
               >
-              <span
-                id="colCountValue"
-                style="font-weight: 700; color: var(--primary-color)"
-                >6</span
-              >
-            </div>
-            <input
-              type="range"
-              id="colCountInput"
-              min="2"
-              max="12"
-              step="1"
-              value="6"
-              class="slider-premium"
-            />
-          </div>
-          <div
-            style="
-              height: 1px;
-              background: var(--border-color);
-              opacity: 0.4;
-              margin: 16px 0;
-            "
-          ></div>
-          <div>
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 8px;
-              "
-            >
-              <span
-                style="font-size: 14px; color: var(--text-color); opacity: 0.9"
-                data-i18n="card_size"
-                >حجم البطاقات</span
-              >
-              <span
-                id="cardSizeValue"
-                style="font-weight: 700; color: var(--primary-color)"
-                >100%</span
-              >
-            </div>
-            <input
-              type="range"
-              id="cardSizeInput"
-              min="60"
-              max="150"
-              step="5"
-              value="100"
-              class="slider-premium"
-            />
-          </div>
+                عام
+              </h3>
 
-          <div id="searchSizeControlWrap">
-            <div
-              style="
-                height: 1px;
-                background: var(--border-color);
-                opacity: 0.4;
-                margin: 16px 0;
-              "
-            ></div>
-            <div>
-              <div
-                style="
-                  display: flex;
-                  justify-content: space-between;
-                  margin-bottom: 8px;
-                "
-              >
-                <span
-                  style="font-size: 14px; color: var(--text-color); opacity: 0.9"
-                  data-i18n="search_size"
-                  >حجم شريط البحث</span
-                >
-                <span
-                  id="searchSizeValue"
-                  style="font-weight: 700; color: var(--primary-color)"
-                  >100%</span
-                >
+              <!-- اللغة -->
+              <div class="settings-option-block">
+                <div class="settings-option-label">
+                  <i data-lucide="globe" width="16" height="16"></i>
+                  <span data-i18n="language">اللغة</span>
+                </div>
+                <select id="languageInput" class="theme-select settings-select">
+                  <option value="ar">العربية</option>
+                  <option value="en">English</option>
+                </select>
               </div>
-              <input
-                type="range"
-                id="searchSizeInput"
-                min="60"
-                max="150"
-                step="5"
-                value="100"
-                class="slider-premium"
-              />
-            </div>
-          </div>
 
-
-
-          <!-- قسم إدارة البيانات المطور -->
-          <div
-            style="
-              margin-top: 24px;
-              padding-top: 16px;
-              border-top: 1px solid var(--border-color);
-            "
-          >
-            <p
-              style="
-                font-size: 13px;
-                font-weight: 700;
-                margin-bottom: 16px;
-                color: var(--text-color);
-                opacity: 0.9;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-              "
-              data-i18n="data_management"
-            >
-              إدارة البيانات
-            </p>
-            <div style="display: flex; flex-direction: column; gap: 16px">
-              <!-- زر الاستيراد (كبير ومتقطع كمنطقة رفع) -->
-              <button
-                id="importDataBtn"
-                style="
-                  width: 100%;
-                  border: 2px dashed var(--primary-color);
-                  padding: 24px 16px;
-                  background: transparent;
-                  border-radius: var(--radius-lg);
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  gap: 12px;
-                  cursor: pointer;
-                  color: var(--text-color);
-                  transition: all 0.3s ease;
-                "
-              >
-                <i
-                  data-lucide="upload-cloud"
-                  width="28"
-                  height="28"
-                  style="color: var(--primary-color)"
-                ></i>
-                <div
-                  style="
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 4px;
-                  "
+              <!-- اتجاه الموقع -->
+              <div class="settings-option-block">
+                <div class="settings-option-label">
+                  <i data-lucide="arrow-right-left" width="16" height="16"></i>
+                  <span data-i18n="site_direction">اتجاه الواجهة</span>
+                </div>
+                <select
+                  id="siteDirectionInput"
+                  class="theme-select settings-select"
                 >
-                  <span
-                    style="font-weight: 700; font-size: 15px"
-                    data-i18n="import_data"
-                    >استيراد من ملف</span
+                  <option value="auto" data-i18n="dir_auto">
+                    تلقائي (حسب اللغة)
+                  </option>
+                  <option value="rtl" data-i18n="dir_rtl">
+                    من اليمين لليسار (RTL)
+                  </option>
+                  <option value="ltr" data-i18n="dir_ltr">
+                    من اليسار لليمين (LTR)
+                  </option>
+                </select>
+              </div>
+
+              <!-- فتح في تبويب جديد -->
+              <div class="settings-option-row">
+                <div class="settings-option-label">
+                  <i data-lucide="external-link" width="16" height="16"></i>
+                  <span data-i18n="open_new_tab"
+                    >فتح المواقع في تبويب جديد</span
                   >
-                  <span
-                    style="
-                      font-size: 12px;
-                      opacity: 0.6;
-                      color: var(--text-muted);
-                    "
-                    >JSON format backup files</span
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="openInNewTabInput" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- ═══════ القسم: العرض ═══════ -->
+            <div class="settings-panel" data-panel="display">
+              <h3
+                class="settings-panel-title"
+                data-i18n="settings_section_display"
+              >
+                العرض
+              </h3>
+
+              <!-- وضع الواجهة البسيط -->
+              <div class="settings-option-row">
+                <div class="settings-option-label">
+                  <i data-lucide="minimize-2" width="16" height="16"></i>
+                  <span data-i18n="simple_mode"
+                    >وضع الواجهة البسيط (إخفاء النصوص)</span
                   >
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="simpleModeInput" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <!-- إخفاء الوصف -->
+              <div class="settings-option-row">
+                <div class="settings-option-label">
+                  <i data-lucide="text" width="16" height="16"></i>
+                  <span data-i18n="hide_description">إخفاء وصف المواقع</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="hideDescriptionInput" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <!-- وضع الأيقونات فقط -->
+              <div class="settings-option-row">
+                <div class="settings-option-label">
+                  <i data-lucide="grid-3x3" width="16" height="16"></i>
+                  <div class="settings-option-label-text">
+                    <span data-i18n="icon_only_mode">وضع الأيقونات فقط</span>
+                    <span
+                      class="settings-option-hint"
+                      data-i18n="icon_only_mode_hint"
+                      >عرض الروابط كمربعات أيقونات بدون نصوص</span
+                    >
+                  </div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="iconOnlyModeInput" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <!-- إخفاء الحواف -->
+              <div class="settings-option-row">
+                <div class="settings-option-label">
+                  <i data-lucide="square" width="16" height="16"></i>
+                  <div class="settings-option-label-text">
+                    <span data-i18n="hide_borders">إخفاء الحواف والإطارات</span>
+                    <span
+                      class="settings-option-hint"
+                      data-i18n="hide_borders_hint"
+                      >إزالة جميع الحدود من المجموعات والبطاقات والعناصر</span
+                    >
+                  </div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="hideBordersInput" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <div class="settings-divider"></div>
+
+              <!-- إخفاء شريط التمرير -->
+              <div class="settings-option-row">
+                <div class="settings-option-label">
+                  <i data-lucide="arrow-up-down" width="16" height="16"></i>
+                  <span data-i18n="hide_scrollbar">إخفاء شريط التمرير</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="hideScrollbarInput" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <!-- شريط البحث -->
+              <div class="settings-option-row">
+                <div class="settings-option-label">
+                  <i data-lucide="search" width="16" height="16"></i>
+                  <span data-i18n="show_search_bar">إظهار شريط البحث</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="showSearchBarInput" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <!-- اقتراحات سجل التصفح -->
+              <div class="settings-option-row">
+                <div class="settings-option-label">
+                  <i data-lucide="history" width="16" height="16"></i>
+                  <span data-i18n="enable_history_search"
+                    >تفعيل اقتراحات سجل التصفح</span
+                  >
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="enableHistorySearchInput" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- ═══════ القسم: التخطيط ═══════ -->
+            <div class="settings-panel" data-panel="layout">
+              <h3
+                class="settings-panel-title"
+                data-i18n="settings_section_layout"
+              >
+                التخطيط
+              </h3>
+
+              <!-- عدد الأعمدة -->
+              <div class="settings-option-block">
+                <div class="settings-option-row-inline">
+                  <span data-i18n="column_count">عدد الأعمدة</span>
+                  <span id="colCountValue" class="settings-range-value">6</span>
+                </div>
+                <input
+                  type="range"
+                  id="colCountInput"
+                  min="2"
+                  max="12"
+                  step="1"
+                  value="6"
+                  class="slider-premium"
+                />
+              </div>
+
+              <div class="settings-divider"></div>
+
+              <!-- حجم البطاقات -->
+              <div class="settings-option-block">
+                <div class="settings-option-row-inline">
+                  <span data-i18n="card_size">حجم البطاقات</span>
+                  <span id="cardSizeValue" class="settings-range-value"
+                    >100%</span
+                  >
+                </div>
+                <input
+                  type="range"
+                  id="cardSizeInput"
+                  min="60"
+                  max="150"
+                  step="5"
+                  value="100"
+                  class="slider-premium"
+                />
+              </div>
+
+              <!-- حجم شريط البحث -->
+              <div id="searchSizeControlWrap">
+                <div class="settings-divider"></div>
+                <div class="settings-option-block">
+                  <div class="settings-option-row-inline">
+                    <span data-i18n="search_size">حجم شريط البحث</span>
+                    <span id="searchSizeValue" class="settings-range-value"
+                      >100%</span
+                    >
+                  </div>
+                  <input
+                    type="range"
+                    id="searchSizeInput"
+                    min="60"
+                    max="150"
+                    step="5"
+                    value="100"
+                    class="slider-premium"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- ═══════ القسم: البيانات ═══════ -->
+            <div class="settings-panel" data-panel="data">
+              <h3
+                class="settings-panel-title"
+                data-i18n="settings_section_data"
+              >
+                البيانات
+              </h3>
+
+              <!-- استيراد -->
+              <button id="importDataBtn" class="settings-import-btn">
+                <i data-lucide="upload-cloud" width="28" height="28"></i>
+                <div class="settings-import-text">
+                  <span data-i18n="import_data">استيراد من ملف</span>
+                  <small>JSON format backup files</small>
                 </div>
               </button>
               <input
@@ -635,18 +813,10 @@
                 style="display: none"
               />
 
-              <!-- زر التصدير (طبيعي) -->
+              <!-- تصدير -->
               <button
                 id="exportDataBtn"
-                class="btn btn-cancel"
-                style="
-                  width: 100%;
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  padding: 12px;
-                  font-weight: 600;
-                "
+                class="btn btn-cancel settings-export-btn"
               >
                 <i data-lucide="download" width="16" height="16"></i>
                 <span data-i18n="export_data">تصدير (نسخة احتياطية)</span>
@@ -654,32 +824,32 @@
             </div>
           </div>
         </div>
-        <div
-          class="modal-actions"
-          style="margin-top: 24px; gap: 8px; flex-wrap: wrap"
-        >
-          <button
-            id="cancelSettingsBtn"
-            class="btn btn-cancel"
-            data-i18n="cancel"
-          >
-            إلغاء
-          </button>
+
+        <!-- Footer: Fixed Buttons -->
+        <div class="settings-footer">
           <button
             id="resetSettingsBtn"
-            class="btn btn-cancel"
-            style="color: #ff4757; border-color: rgba(255, 71, 87, 0.2)"
+            class="btn btn-cancel settings-reset-btn"
             data-i18n="reset_settings"
           >
             إعادة الضبط
           </button>
-          <button
-            id="saveSettingsBtn"
-            class="btn btn-save"
-            data-i18n="save_settings"
-          >
-            حفظ الإعدادات
-          </button>
+          <div class="settings-footer-end">
+            <button
+              id="cancelSettingsBtn"
+              class="btn btn-cancel"
+              data-i18n="cancel"
+            >
+              إلغاء
+            </button>
+            <button
+              id="saveSettingsBtn"
+              class="btn btn-save"
+              data-i18n="save_settings"
+            >
+              حفظ الإعدادات
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -690,9 +860,29 @@
         class="modal"
         style="max-width: 450px; text-align: center; padding: 24px"
       >
-        <div class="modal-header" style="margin-bottom: 24px; justify-content: space-between; display: flex; align-items: center; width: 100%;">
-          <h2 style="margin: 0; font-size: 24px;" data-i18n="about_title">حول المشروع</h2>
-          <button id="closeAboutX" class="header-btn" style="padding: 10px; justify-content: center; height: 42px; width: 42px;">
+        <div
+          class="modal-header"
+          style="
+            margin-bottom: 24px;
+            justify-content: space-between;
+            display: flex;
+            align-items: center;
+            width: 100%;
+          "
+        >
+          <h2 style="margin: 0; font-size: 24px" data-i18n="about_title">
+            حول المشروع
+          </h2>
+          <button
+            id="closeAboutX"
+            class="header-btn"
+            style="
+              padding: 10px;
+              justify-content: center;
+              height: 42px;
+              width: 42px;
+            "
+          >
             <i data-lucide="x" width="20" height="20"></i>
           </button>
         </div>
@@ -706,8 +896,8 @@
           "
           data-i18n="about_desc"
         >
-          ControlTap هي واجهة بداية مخصصة تم تصميمها لتكون سريعة، بسيطة، واحترافية.
-          يمكنك تنظيم روابطك بسهولة وتخصيص المظهر بالكامل.
+          ControlTap هي واجهة بداية مخصصة تم تصميمها لتكون سريعة، بسيطة،
+          واحترافية. يمكنك تنظيم روابطك بسهولة وتخصيص المظهر بالكامل.
         </p>
 
         <div

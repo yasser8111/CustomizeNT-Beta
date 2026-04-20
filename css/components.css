@@ -138,9 +138,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(var(--card-bg-rgb), calc(var(--card-opacity) * 0.5));
+  background: var(--site-bg);
   border-radius: var(--radius) var(--radius) 0 0;
-  border-bottom: 1px solid var(--border-color);
   user-select: none;
   position: relative;
 }

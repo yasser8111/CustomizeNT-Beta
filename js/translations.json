@@ -104,7 +104,21 @@
     "text_widget_title": "عنوان",
     "text_widget_body": "اكتب هنا...",
     "focus_mode": "وضع التركيز",
-    "exit_focus_mode": "إيقاف وضع التركيز"
+    "exit_focus_mode": "إيقاف وضع التركيز",
+    "settings_section_general": "عام",
+    "settings_section_display": "العرض",
+    "settings_section_layout": "التخطيط",
+    "settings_section_data": "البيانات",
+    "hide_description": "إخفاء وصف المواقع",
+    "icon_only_mode": "وضع الأيقونات فقط",
+    "icon_only_mode_hint": "عرض الروابط كمربعات أيقونات بدون نصوص",
+    "site_direction": "اتجاه الواجهة",
+    "dir_auto": "تلقائي (حسب اللغة)",
+    "dir_rtl": "من اليمين لليسار (RTL)",
+    "dir_ltr": "من اليسار لليمين (LTR)",
+    "bg_url_placeholder": "أو أدخل رابط صورة / فيديو للخلفية...",
+    "hide_borders": "إخفاء الحواف والإطارات",
+    "hide_borders_hint": "إزالة جميع الحدود من المجموعات والبطاقات والعناصر"
   },
   "en": {
     "page_title": "ControlTap | Custom New Tab",
@@ -211,6 +225,20 @@
     "text_widget_title": "Title",
     "text_widget_body": "Type here...",
     "focus_mode": "Focus Mode",
-    "exit_focus_mode": "Exit Focus Mode"
+    "exit_focus_mode": "Exit Focus Mode",
+    "settings_section_general": "General",
+    "settings_section_display": "Display",
+    "settings_section_layout": "Layout",
+    "settings_section_data": "Data",
+    "hide_description": "Hide Site Descriptions",
+    "icon_only_mode": "Icon-Only Mode",
+    "icon_only_mode_hint": "Display links as icon squares without text",
+    "site_direction": "Interface Direction",
+    "dir_auto": "Auto (based on language)",
+    "dir_rtl": "Right-to-Left (RTL)",
+    "dir_ltr": "Left-to-Right (LTR)",
+    "bg_url_placeholder": "Or enter an image/video URL for the background...",
+    "hide_borders": "Hide Borders & Outlines",
+    "hide_borders_hint": "Remove all borders from groups, cards, and elements"
   }
 }
